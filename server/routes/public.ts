@@ -57,7 +57,7 @@ router.post("/quotes", async (req, res) => {
     );
     return res.status(201).json(result);
   } catch (err: any) {
-    console.error('Public /quotes error:', err);
+    console.error("Public /quotes error:", err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -73,7 +73,7 @@ router.post("/contacts", async (req, res) => {
     );
     return res.status(201).json(result);
   } catch (err: any) {
-    console.error('Public /contacts error:', err);
+    console.error("Public /contacts error:", err);
     return res.status(500).json({ error: err.message });
   }
 });

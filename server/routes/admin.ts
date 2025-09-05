@@ -6,10 +6,17 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.warn("Supabase credentials not set (SUPABASE_URL/SUPABASE_KEY). Admin routes will fail until configured.");
+  console.warn(
+    "Supabase credentials not set (SUPABASE_URL/SUPABASE_KEY). Admin routes will fail until configured.",
+  );
 }
 
-async function supabaseRequest(table: string, method = "GET", body?: any, query = "") {
+async function supabaseRequest(
+  table: string,
+  method = "GET",
+  body?: any,
+  query = "",
+) {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error("Supabase not configured");
   }
@@ -50,28 +57,39 @@ const ALLOWED_TABLES = {
 router.use(async (req, res, next) => {
   try {
     const auth = req.headers.authorization as string | undefined;
-    if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
-    if (!SUPABASE_URL || !SUPABASE_KEY) return res.status(500).json({ error: "Supabase not configured" });
+    if (!auth)
+      return res.status(401).json({ error: "Missing Authorization header" });
+    if (!SUPABASE_URL || !SUPABASE_KEY)
+      return res.status(500).json({ error: "Supabase not configured" });
     // validate token with Supabase Auth
-    const userResp = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`, {
-      headers: { Authorization: auth, apikey: SUPABASE_KEY },
-    });
-    if (!userResp.ok) return res.status(401).json({ error: "Invalid auth token" });
+    const userResp = await fetch(
+      `${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`,
+      {
+        headers: { Authorization: auth, apikey: SUPABASE_KEY },
+      },
+    );
+    if (!userResp.ok)
+      return res.status(401).json({ error: "Invalid auth token" });
     const user = await userResp.json();
     const email = (user as any).email;
     if (!email) return res.status(401).json({ error: "Unauthenticated" });
     // check admin_users table
     try {
-      const rows = await supabaseRequest('admin_users', 'GET', undefined, `?email=eq.${encodeURIComponent(email)}`);
+      const rows = await supabaseRequest(
+        "admin_users",
+        "GET",
+        undefined,
+        `?email=eq.${encodeURIComponent(email)}`,
+      );
       if (Array.isArray(rows) && rows.length > 0) {
         // attach user info
         (req as any).supabaseUser = user;
         return next();
       }
     } catch (e) {
-      console.warn('admin lookup failed', e);
+      console.warn("admin lookup failed", e);
     }
-    return res.status(403).json({ error: 'Forbidden: not an admin' });
+    return res.status(403).json({ error: "Forbidden: not an admin" });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
@@ -119,7 +137,12 @@ router.post("/jobs", async (req, res) => {
   try {
     const payload = req.body;
     // Supabase REST insert requires prefer return=representation to return rows
-    const result = await supabaseRequest(ALLOWED_TABLES.jobs, "POST", payload, "?return=representation");
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.jobs,
+      "POST",
+      payload,
+      "?return=representation",
+    );
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -130,7 +153,12 @@ router.post("/jobs", async (req, res) => {
 router.post("/resources", async (req, res) => {
   try {
     const payload = req.body;
-    const result = await supabaseRequest(ALLOWED_TABLES.resources, "POST", payload, "?return=representation");
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.resources,
+      "POST",
+      payload,
+      "?return=representation",
+    );
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -142,9 +170,12 @@ router.post("/upload", async (req, res) => {
   try {
     const { bucket, path, file_base64, contentType } = req.body;
     if (!bucket || !path || !file_base64) {
-      return res.status(400).json({ error: "bucket, path and file_base64 are required" });
+      return res
+        .status(400)
+        .json({ error: "bucket, path and file_base64 are required" });
     }
-    if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error("Supabase not configured");
+    if (!SUPABASE_URL || !SUPABASE_KEY)
+      throw new Error("Supabase not configured");
     const url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeURIComponent(path)}`;
     const buffer = Buffer.from(file_base64, "base64");
     const resp = await fetch(url, {
@@ -158,7 +189,9 @@ router.post("/upload", async (req, res) => {
     });
     if (!resp.ok) {
       const text = await resp.text();
-      return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}` });
+      return res
+        .status(500)
+        .json({ error: `Upload failed: ${resp.status} ${text}` });
     }
     // Return public URL (if bucket is public)
     const publicUrl = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent(bucket)}/${encodeURIComponent(path)}`;
@@ -176,19 +209,23 @@ router.get("/export/:table", async (req, res) => {
     if (!table) return res.status(400).json({ error: "Invalid export target" });
 
     const rows = await supabaseRequest(table);
-    if (!Array.isArray(rows)) return res.status(500).json({ error: "Unexpected response" });
+    if (!Array.isArray(rows))
+      return res.status(500).json({ error: "Unexpected response" });
 
     if (rows.length === 0) {
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename=\"${key}.csv\"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=\"${key}.csv\"`,
+      );
       return res.send("");
     }
 
     const columns = Object.keys(rows[0]);
     const escape = (v: any) => {
       if (v === null || v === undefined) return "";
-      const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
-      if (s.includes(',') || s.includes('\n') || s.includes('"')) {
+      const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+      if (s.includes(",") || s.includes("\n") || s.includes('"')) {
         return '"' + s.replace(/"/g, '""') + '"';
       }
       return s;
