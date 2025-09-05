@@ -20,13 +20,16 @@ export function createServer() {
   app.get("/api/demo", handleDemo);
 
   // Admin routes (Supabase proxy)
-  try {
-    const adminRouter = (await import("./routes/admin")).default;
-    app.use("/api/admin", adminRouter);
-  } catch (err) {
-    // silent if admin routes missing
-    console.warn("Admin routes not available:", (err as Error).message);
-  }
+  // dynamically import admin routes and attach when available
+  import("./routes/admin")
+    .then((mod) => {
+      const adminRouter = (mod as any).default;
+      app.use("/api/admin", adminRouter);
+    })
+    .catch((err) => {
+      // silent if admin routes missing
+      console.warn("Admin routes not available:", (err as Error).message);
+    });
 
   return app;
 }
