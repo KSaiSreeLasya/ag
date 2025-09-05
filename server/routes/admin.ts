@@ -39,9 +39,10 @@ async function supabaseRequest(table: string, method = "GET", body?: any, query 
 }
 
 const ALLOWED_TABLES = {
-  quotes: "get_quotes",
+  // match the tables created by migrations: quotes, contacts, jobs, resources
+  quotes: "quotes",
   contacts: "contacts",
-  jobs: "careers_jobs",
+  jobs: "jobs",
   resources: "resources",
 };
 
