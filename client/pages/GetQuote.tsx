@@ -58,7 +58,15 @@ export default function GetQuote() {
       });
       if (!resp.ok) {
         let body: any = null;
-        try { body = await resp.json(); } catch { try { body = await resp.text(); } catch { body = null; } }
+        try {
+          body = await resp.json();
+        } catch {
+          try {
+            body = await resp.text();
+          } catch {
+            body = null;
+          }
+        }
         const { toast } = await import("sonner");
         toast.error("Failed to submit quote");
         console.error("Quote submit failed:", body);
