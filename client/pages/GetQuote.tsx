@@ -38,21 +38,43 @@ export default function GetQuote() {
     ];
   }, [category]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = Object.fromEntries(new FormData(form).entries());
-    console.log("Get Quote submitted:", { category, ...data });
+    const payload = { category, ...data };
     const submitBtn = form.querySelector(
       "button[type=submit]",
-    ) as HTMLButtonElement;
-    if (submitBtn) {
-      submitBtn.textContent = "Submitted";
-      submitBtn.disabled = true;
-      setTimeout(() => {
-        submitBtn.textContent = "Submit Details";
+    ) as HTMLButtonElement | null;
+    try {
+      if (submitBtn) {
+        submitBtn.textContent = "Submitting...";
+        submitBtn.disabled = true;
+      }
+      const resp = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        const { toast } = await import('sonner');
+        toast.error('Failed to submit quote');
+        console.error('Quote submit failed:', txt);
+        return;
+      }
+      const { toast } = await import('sonner');
+      toast.success('Quote request submitted — we will reach out soon');
+      form.reset();
+    } catch (err) {
+      const { toast } = await import('sonner');
+      toast.error('Failed to submit quote');
+      console.error(err);
+    } finally {
+      if (submitBtn) {
+        submitBtn.textContent = 'Submit Details';
         submitBtn.disabled = false;
-      }, 2000);
+      }
     }
   };
 
