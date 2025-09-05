@@ -188,7 +188,7 @@ export default function DigitalSolutions() {
         <ParticleSystem
           particleCount={70}
           colors={["#FFD700", "#FFA500", "#FF8C00", "#4169E1"]}
-          className="opacity-20"
+          className="opacity-10"
         />
 
         <motion.div
