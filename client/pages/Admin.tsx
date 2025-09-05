@@ -67,9 +67,11 @@ export default function Admin() {
       // upload to server
       const bucket = 'resources';
       const path = `${Date.now()}-${file.name}`;
+      const headers: any = { 'content-type': 'application/json' };
+      if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
       const resp = await fetch('/api/admin/upload', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers,
         body: JSON.stringify({ bucket, path, file_base64: base64, contentType: file.type }),
       });
       const data = await resp.json();
