@@ -50,13 +50,14 @@ router.post("/quotes", async (req, res) => {
   try {
     const payload = req.body || {};
     const result = await supabaseRequest(
-      "get_quotes",
+      "quotes",
       "POST",
       payload,
       "?return=representation",
     );
     return res.status(201).json(result);
   } catch (err: any) {
+    console.error('Public /quotes error:', err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -72,6 +73,7 @@ router.post("/contacts", async (req, res) => {
     );
     return res.status(201).json(result);
   } catch (err: any) {
+    console.error('Public /contacts error:', err);
     return res.status(500).json({ error: err.message });
   }
 });
