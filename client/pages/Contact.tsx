@@ -25,11 +25,11 @@ export default function Contact() {
         body: JSON.stringify(data),
       });
       if (!resp.ok) {
-        const txt = await resp.text();
-        // show error toast
+        let body: any = null;
+        try { body = await resp.json(); } catch { try { body = await resp.text(); } catch { body = null; } }
         const { toast } = await import("sonner");
         toast.error("Failed to send message");
-        console.error("Contact submit failed:", txt);
+        console.error("Contact submit failed:", body);
         return;
       }
       // success
