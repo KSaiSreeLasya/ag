@@ -38,11 +38,43 @@ export default function Admin() {
     fetchList();
   };
 
+  const [uploading, setUploading] = React.useState(false);
   const submitResource = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/admin/resources', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(resourceForm) });
     setResourceForm({ title: "", resource_type: "", file_url: "", description: "" });
     fetchList();
+  };
+
+  const handleFileChange = async (file?: File) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      // upload to server
+      const bucket = 'resources';
+      const path = `${Date.now()}-${file.name}`;
+      const resp = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ bucket, path, file_base64: base64, contentType: file.type }),
+      });
+      const data = await resp.json();
+      if (data?.url) {
+        setResourceForm((s) => ({ ...s, file_url: data.url }));
+      } else {
+        console.error('Upload failed', data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const download = (key: string) => {
