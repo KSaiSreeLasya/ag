@@ -37,7 +37,9 @@ export default function Admin() {
 
   const submitJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch('/api/admin/jobs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(jobForm) });
+    const headers: any = { 'content-type': 'application/json' };
+    if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
+    await fetch('/api/admin/jobs', { method: 'POST', headers, body: JSON.stringify(jobForm) });
     setJobForm({ title: "", location: "", employment_type: "", department: "", description: "", requirements: "" });
     fetchList();
   };
