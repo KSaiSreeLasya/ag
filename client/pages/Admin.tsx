@@ -182,8 +182,8 @@ export default function Admin() {
               <div>
                 <h3 className="font-medium">Existing Jobs</h3>
                 <ul className="mt-2 space-y-2 text-sm">
-                  {jobs.map((j:any) => (
-                    <li key={j.id}>{j.title} — {j.location}</li>
+                  {jobs.map((j:any, idx:number) => (
+                    <li key={j.id ?? `job-${idx}`}>{j.title} — {j.location}</li>
                   ))}
                 </ul>
               </div>
