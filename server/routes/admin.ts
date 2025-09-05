@@ -117,7 +117,7 @@ router.get("/export/:table", async (req, res) => {
 
     if (rows.length === 0) {
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename="${key}.csv"");
+      res.setHeader("Content-Disposition", `attachment; filename=\"${key}.csv\"`);
       return res.send("");
     }
 
@@ -135,7 +135,7 @@ router.get("/export/:table", async (req, res) => {
       .join("\n");
 
     res.setHeader("Content-Type", "text/csv");
-    res.setHeader("Content-Disposition", `attachment; filename="${key}.csv"");
+    res.setHeader("Content-Disposition", `attachment; filename=\"${key}.csv\"`);
     res.send(csv);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
