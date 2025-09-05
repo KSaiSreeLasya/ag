@@ -45,6 +45,37 @@ const ALLOWED_TABLES = {
   resources: "resources",
 };
 
+// Middleware: require admin user via Supabase auth
+router.use(async (req, res, next) => {
+  try {
+    const auth = req.headers.authorization as string | undefined;
+    if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
+    if (!SUPABASE_URL || !SUPABASE_KEY) return res.status(500).json({ error: "Supabase not configured" });
+    // validate token with Supabase Auth
+    const userResp = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/user`, {
+      headers: { Authorization: auth, apikey: SUPABASE_KEY },
+    });
+    if (!userResp.ok) return res.status(401).json({ error: "Invalid auth token" });
+    const user = await userResp.json();
+    const email = (user as any).email;
+    if (!email) return res.status(401).json({ error: "Unauthenticated" });
+    // check admin_users table
+    try {
+      const rows = await supabaseRequest('admin_users', 'GET', undefined, `?email=eq.${encodeURIComponent(email)}`);
+      if (Array.isArray(rows) && rows.length > 0) {
+        // attach user info
+        (req as any).supabaseUser = user;
+        return next();
+      }
+    } catch (e) {
+      console.warn('admin lookup failed', e);
+    }
+    return res.status(403).json({ error: 'Forbidden: not an admin' });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // List endpoints
 router.get("/quotes", async (req, res) => {
   try {
