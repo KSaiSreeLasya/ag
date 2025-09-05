@@ -11,6 +11,7 @@ export default function Navigation() {
     null,
   );
   const location = Router.useLocation();
+  const navigate = Router.useNavigate();
 
   const navItems = [
     { name: "Home", path: "/" },
