@@ -188,7 +188,7 @@ export default function DigitalSolutions() {
         <ParticleSystem
           particleCount={70}
           colors={["#FFD700", "#FFA500", "#FF8C00", "#4169E1"]}
-          className="opacity-30"
+          className="opacity-20"
         />
 
         <motion.div
@@ -202,7 +202,7 @@ export default function DigitalSolutions() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm text-purple-600 rounded-full text-sm font-medium mb-8 border border-purple-500/20"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-sm text-purple-600 rounded-full text-sm font-medium mb-8 border border-purple-500/10"
               >
                 <Monitor className="w-4 h-4 mr-2" />
                 Digital Energy Solutions
@@ -282,7 +282,7 @@ export default function DigitalSolutions() {
             >
               {/* Main Dashboard Card */}
               <motion.div
-                className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 relative overflow-hidden"
+                className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
                 whileHover={{
                   scale: 1.02,
                   rotateY: 5,
@@ -382,10 +382,10 @@ export default function DigitalSolutions() {
                   key={i}
                   className={`absolute w-20 h-20 rounded-2xl shadow-lg ${
                     i === 0
-                      ? "bg-purple-400/20 -top-6 -right-6"
+                      ? "bg-purple-400/10 -top-6 -right-6"
                       : i === 1
-                        ? "bg-blue-400/20 -bottom-6 -left-6"
-                        : "bg-green-400/20 top-1/2 -right-12"
+                        ? "bg-blue-400/10 -bottom-6 -left-6"
+                      : "bg-green-400/10 top-1/2 -right-12"
                   }`}
                   animate={{
                     y: [0, -15, 0],
@@ -694,7 +694,7 @@ export default function DigitalSolutions() {
                 <Card
                   className={`h-full bg-gradient-to-br ${feature.gradient} border-none backdrop-blur-sm overflow-hidden relative`}
                 >
-                  <div className="absolute inset-0 bg-white/90 group-hover:bg-white/95 transition-colors" />
+                  <div className="absolute inset-0 bg-white/70 group-hover:bg-white/80 transition-colors" />
 
                   <CardHeader className="relative z-10">
                     <motion.div
