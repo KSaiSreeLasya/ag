@@ -14,7 +14,20 @@ export default function Navigation() {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Solutions", path: "/solutions" },
+    {
+      name: "Solutions",
+      path: "/solutions",
+      dropdown: [
+        { name: "Solar", path: "/solutions/solar", sub: [
+          { name: "Residential (B2C)", path: "/solutions/b2c" },
+          { name: "Commercial (B2B)", path: "/solutions/b2b" },
+          { name: "Government (B2G)", path: "/solutions/b2g" },
+        ] },
+        { name: "Wind", path: "/solutions/wind" },
+        { name: "Energy Storage", path: "/solutions/storage" },
+        { name: "EV Stations", path: "/solutions/ev-stations" },
+      ],
+    },
     {
       name: "Services",
       path: "#",
