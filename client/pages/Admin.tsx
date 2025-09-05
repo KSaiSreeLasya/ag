@@ -23,16 +23,39 @@ export default function Admin() {
   const fetchList = async () => {
     const headers: any = { 'content-type': 'application/json' };
     if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
-    const [qRes, cRes, jRes, rRes] = await Promise.all([
-      fetch('/api/admin/quotes', { headers }).then((r) => r.json()).catch(() => []),
-      fetch('/api/admin/contacts', { headers }).then((r) => r.json()).catch(() => []),
-      fetch('/api/admin/jobs', { headers }).then((r) => r.json()).catch(() => []),
-      fetch('/api/admin/resources', { headers }).then((r) => r.json()).catch(() => []),
+
+    const safeJson = async (resPromise: Promise<Response>) => {
+      try {
+        const res = await resPromise;
+        const json = await res.json().catch(() => null);
+        return json;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const [qResRaw, cResRaw, jResRaw, rResRaw] = await Promise.all([
+      safeJson(fetch('/api/admin/quotes', { headers })),
+      safeJson(fetch('/api/admin/contacts', { headers })),
+      safeJson(fetch('/api/admin/jobs', { headers })),
+      safeJson(fetch('/api/admin/resources', { headers })),
     ]);
-    setQuotes(qRes || []);
-    setContacts(cRes || []);
-    setJobs(jRes || []);
-    setResources(rRes || []);
+
+    const normalize = (v: any) => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v;
+      if (Array.isArray(v?.data)) return v.data;
+      if (Array.isArray(v?.quotes)) return v.quotes;
+      if (Array.isArray(v?.items)) return v.items;
+      // fallback: if object with keys, convert to array of values
+      if (typeof v === 'object') return Object.values(v);
+      return [];
+    };
+
+    setQuotes(normalize(qResRaw));
+    setContacts(normalize(cResRaw));
+    setJobs(normalize(jResRaw));
+    setResources(normalize(rResRaw));
   };
 
   const submitJob = async (e: React.FormEvent) => {
