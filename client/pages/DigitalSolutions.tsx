@@ -202,7 +202,7 @@ export default function DigitalSolutions() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-sm text-purple-600 rounded-full text-sm font-medium mb-8 border border-purple-500/10"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500/5 to-blue-500/5 backdrop-blur-sm text-purple-600 rounded-full text-sm font-medium mb-8 border border-purple-500/10"
               >
                 <Monitor className="w-4 h-4 mr-2" />
                 Digital Energy Solutions
