@@ -157,8 +157,8 @@ export default function Admin() {
               <div className="mt-4">
                 <h3 className="font-medium">Recent Quotes</h3>
                 <ul className="mt-2 space-y-2 text-sm">
-                  {quotes.slice(0,10).map((q:any) => (
-                    <li key={q.id}>{q.name} — {q.category} — {q.bill_range}</li>
+                  {quotes.slice(0,10).map((q:any, idx:number) => (
+                    <li key={q.id ?? `quote-${idx}`}>{q.name} — {q.category} — {q.bill_range}</li>
                   ))}
                 </ul>
               </div>
