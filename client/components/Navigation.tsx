@@ -130,13 +130,31 @@ export default function Navigation() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.05 }}
                           >
-                            <Router.Link
-                              to={dropdownItem.path}
-                              className="block px-4 py-2 text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors"
-                              onClick={() => setActiveDropdown(null)}
-                            >
-                              {dropdownItem.name}
-                            </Router.Link>
+                            <div className="px-4 py-2">
+                              <Router.Link
+                                to={dropdownItem.path}
+                                className="block text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors px-2 py-1 rounded-md"
+                                onClick={() => setActiveDropdown(null)}
+                              >
+                                {dropdownItem.name}
+                              </Router.Link>
+
+                              {/* If Solar, render small sub-links */}
+                              {dropdownItem.sub && (
+                                <div className="mt-2 ml-3 space-y-1">
+                                  {dropdownItem.sub.map((subItem) => (
+                                    <Router.Link
+                                      key={subItem.path}
+                                      to={subItem.path}
+                                      className="block text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-md"
+                                      onClick={() => setActiveDropdown(null)}
+                                    >
+                                      {subItem.name}
+                                    </Router.Link>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </motion.div>
                         ))}
                       </motion.div>
