@@ -81,8 +81,29 @@ export default function Admin() {
     }
   };
 
-  const download = (key: string) => {
-    window.location.href = `/api/admin/export/${key}`;
+  const download = async (key: string) => {
+    try {
+      const headers: any = {};
+      if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
+      const resp = await fetch(`/api/admin/export/${key}`, { headers });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        alert('Export failed: ' + txt);
+        return;
+      }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${key}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Export failed');
+      console.error(err);
+    }
   };
 
   return (
