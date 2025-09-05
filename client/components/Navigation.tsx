@@ -10,6 +10,7 @@ export default function Navigation() {
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(
     null,
   );
+  const [openSub, setOpenSub] = React.useState<string | null>(null);
   const location = Router.useLocation();
   const navigate = Router.useNavigate();
 
