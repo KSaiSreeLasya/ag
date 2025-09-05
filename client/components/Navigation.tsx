@@ -85,6 +85,11 @@ export default function Navigation() {
                 >
                   {item.dropdown ? (
                     <button
+                      onClick={() => {
+                        if (item.path && item.path !== "#") navigate(item.path);
+                      }}
+                      aria-haspopup={!!item.dropdown}
+                      aria-expanded={activeDropdown === item.name}
                       className={cn(
                         "flex items-center space-x-1 px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg hover:bg-solar-50",
                         "text-foreground hover:text-solar-700",
