@@ -57,10 +57,11 @@ export default function GetQuote() {
         body: JSON.stringify(payload),
       });
       if (!resp.ok) {
-        const txt = await resp.text();
+        let body: any = null;
+        try { body = await resp.json(); } catch { try { body = await resp.text(); } catch { body = null; } }
         const { toast } = await import("sonner");
         toast.error("Failed to submit quote");
-        console.error("Quote submit failed:", txt);
+        console.error("Quote submit failed:", body);
         return;
       }
       const { toast } = await import("sonner");
