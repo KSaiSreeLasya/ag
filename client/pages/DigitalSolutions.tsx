@@ -382,10 +382,10 @@ export default function DigitalSolutions() {
                   key={i}
                   className={`absolute w-20 h-20 rounded-2xl shadow-lg ${
                     i === 0
-                      ? "bg-purple-400/10 -top-6 -right-6"
+                      ? "bg-purple-400/5 -top-6 -right-6"
                       : i === 1
-                        ? "bg-blue-400/10 -bottom-6 -left-6"
-                      : "bg-green-400/10 top-1/2 -right-12"
+                        ? "bg-blue-400/5 -bottom-6 -left-6"
+                      : "bg-green-400/5 top-1/2 -right-12"
                   }`}
                   animate={{
                     y: [0, -15, 0],
