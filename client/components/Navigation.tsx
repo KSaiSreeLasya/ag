@@ -139,10 +139,13 @@ export default function Navigation() {
                             <div className="px-4 py-2">
                               <Router.Link
                                 to={dropdownItem.path}
-                                className="block text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors px-2 py-1 rounded-md"
+                                className="flex items-center justify-between text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors px-2 py-1 rounded-md"
                                 onClick={() => setActiveDropdown(null)}
                               >
-                                {dropdownItem.name}
+                                <span>{dropdownItem.name}</span>
+                                {dropdownItem.sub && (
+                                  <ChevronRight className="w-4 h-4 text-muted-foreground ml-2" />
+                                )}
                               </Router.Link>
 
                               {/* If Solar, render small sub-links */}
