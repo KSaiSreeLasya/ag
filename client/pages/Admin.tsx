@@ -47,7 +47,9 @@ export default function Admin() {
   const [uploading, setUploading] = React.useState(false);
   const submitResource = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch('/api/admin/resources', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(resourceForm) });
+    const headers: any = { 'content-type': 'application/json' };
+    if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
+    await fetch('/api/admin/resources', { method: 'POST', headers, body: JSON.stringify(resourceForm) });
     setResourceForm({ title: "", resource_type: "", file_url: "", description: "" });
     fetchList();
   };
