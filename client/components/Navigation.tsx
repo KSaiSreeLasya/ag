@@ -138,19 +138,46 @@ export default function Navigation() {
                             transition={{ delay: index * 0.05 }}
                           >
                             <div className="px-4 py-2">
-                              <Router.Link
-                                to={dropdownItem.path}
-                                className="flex items-center justify-between text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors px-2 py-1 rounded-md"
-                                onClick={() => setActiveDropdown(null)}
-                              >
-                                <span>{dropdownItem.name}</span>
-                                {dropdownItem.sub && (
-                                  <ChevronRight className="w-4 h-4 text-muted-foreground ml-2" />
-                                )}
-                              </Router.Link>
+                              <div className="flex items-center justify-between">
+                                <Router.Link
+                                  to={dropdownItem.path}
+                                  className="text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors px-2 py-1 rounded-md"
+                                  onClick={() => {
+                                    setActiveDropdown(null);
+                                    setOpenSub(null);
+                                  }}
+                                >
+                                  {dropdownItem.name}
+                                </Router.Link>
 
-                              {/* If Solar, render small sub-links */}
-                              {dropdownItem.sub && (
+                                {dropdownItem.sub && (
+                                  <button
+                                    type="button"
+                                    aria-label={openSub === dropdownItem.name ? "Collapse" : "Expand"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      setOpenSub(
+                                        openSub === dropdownItem.name
+                                          ? null
+                                          : dropdownItem.name,
+                                      );
+                                    }}
+                                    className="p-1 rounded hover:bg-solar-50"
+                                  >
+                                    <ChevronRight
+                                      className={`w-4 h-4 text-muted-foreground transform transition-transform ${
+                                        openSub === dropdownItem.name
+                                          ? "rotate-90"
+                                          : ""
+                                      }`}
+                                    />
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* If Solar, render small sub-links only when expanded */}
+                              {dropdownItem.sub && openSub === dropdownItem.name && (
                                 <div className="mt-2 ml-3 space-y-1">
                                   {dropdownItem.sub.map((subItem) => (
                                     <Router.Link
