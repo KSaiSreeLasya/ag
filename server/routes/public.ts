@@ -33,8 +33,12 @@ async function supabaseRequest(
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Supabase request failed: ${res.status} ${text}`);
+    const text = await res.text().catch(() => "");
+    const headersObj: Record<string, string> = {};
+    res.headers.forEach((v, k) => (headersObj[k] = v));
+    throw new Error(
+      `Supabase request failed: status=${res.status} statusText=${res.statusText} url=${url} body=${text} headers=${JSON.stringify(headersObj)}`,
+    );
   }
   const contentType = res.headers.get("content-type") || "";
   if (contentType.includes("application/json")) return res.json();
