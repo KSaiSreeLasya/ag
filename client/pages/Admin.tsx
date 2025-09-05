@@ -92,6 +92,11 @@ export default function Admin() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
 
+          <div className="mb-4">
+            <label className="text-sm font-medium mr-2">Admin Token (paste Bearer token):</label>
+            <input className="border px-2 py-1 rounded w-96" value={adminToken ?? ""} onChange={(e) => setAdminToken(e.target.value)} placeholder="Bearer ey..." />
+          </div>
+
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="bg-white/80 p-6 rounded-xl shadow">
               <h2 className="font-semibold mb-3">Submissions</h2>
