@@ -14,16 +14,20 @@ export default function Admin() {
   const [jobForm, setJobForm] = React.useState({ title: "", location: "", employment_type: "", department: "", description: "", requirements: "" });
   const [resourceForm, setResourceForm] = React.useState({ title: "", resource_type: "", file_url: "", description: "" });
 
+  const [adminToken, setAdminToken] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     fetchList();
-  }, []);
+  }, [adminToken]);
 
   const fetchList = async () => {
+    const headers: any = { 'content-type': 'application/json' };
+    if (adminToken) headers.Authorization = `Bearer ${adminToken}`;
     const [qRes, cRes, jRes, rRes] = await Promise.all([
-      fetch('/api/admin/quotes').then((r) => r.json()).catch(() => []),
-      fetch('/api/admin/contacts').then((r) => r.json()).catch(() => []),
-      fetch('/api/admin/jobs').then((r) => r.json()).catch(() => []),
-      fetch('/api/admin/resources').then((r) => r.json()).catch(() => []),
+      fetch('/api/admin/quotes', { headers }).then((r) => r.json()).catch(() => []),
+      fetch('/api/admin/contacts', { headers }).then((r) => r.json()).catch(() => []),
+      fetch('/api/admin/jobs', { headers }).then((r) => r.json()).catch(() => []),
+      fetch('/api/admin/resources', { headers }).then((r) => r.json()).catch(() => []),
     ]);
     setQuotes(qRes || []);
     setContacts(cRes || []);
