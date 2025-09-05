@@ -105,6 +105,37 @@ router.post("/resources", async (req, res) => {
   }
 });
 
+// Upload file to Supabase Storage (expects JSON with base64)
+router.post("/upload", async (req, res) => {
+  try {
+    const { bucket, path, file_base64, contentType } = req.body;
+    if (!bucket || !path || !file_base64) {
+      return res.status(400).json({ error: "bucket, path and file_base64 are required" });
+    }
+    if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error("Supabase not configured");
+    const url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeURIComponent(path)}`;
+    const buffer = Buffer.from(file_base64, "base64");
+    const resp = await fetch(url, {
+      method: "PUT",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": contentType || "application/octet-stream",
+      },
+      body: buffer,
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}` });
+    }
+    // Return public URL (if bucket is public)
+    const publicUrl = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent(bucket)}/${encodeURIComponent(path)}`;
+    res.json({ ok: true, url: publicUrl });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Export CSV for a table key
 router.get("/export/:table", async (req, res) => {
   try {
