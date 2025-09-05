@@ -19,6 +19,16 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Public submission routes (quotes, contacts)
+  import("./routes/public")
+    .then((mod) => {
+      const publicRouter = (mod as any).default;
+      app.use("/api", publicRouter);
+    })
+    .catch((err) => {
+      console.warn("Public routes not available:", (err as Error).message);
+    });
+
   // Admin routes (Supabase proxy)
   // dynamically import admin routes and attach when available
   import("./routes/admin")
