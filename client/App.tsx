@@ -25,6 +25,7 @@ import EVStations from "./pages/EVStations";
 import B2B from "./pages/B2B";
 import B2C from "./pages/B2C";
 import B2G from "./pages/B2G";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
