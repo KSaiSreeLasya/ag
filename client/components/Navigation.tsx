@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as React from "react";
 import * as Router from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sun, ChevronDown, ChevronRight, Menu, X } from "lucide-react";
