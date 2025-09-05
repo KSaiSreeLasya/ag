@@ -124,24 +124,21 @@ export default function Navigation() {
                   <AnimatePresence>
                     {item.dropdown && activeDropdown === item.name && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-1 w-56 bg-white/95 backdrop-blur-md border border-solar-200 rounded-xl shadow-lg py-2"
+                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 mt-1 rounded-xl shadow-lg py-2 flex"
+                        style={{ minWidth: 220 }}
                       >
-                        {item.dropdown.map((dropdownItem, index) => (
-                          <motion.div
-                            key={dropdownItem.path}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                          >
-                            <div className="px-4 py-2">
+                        {/* Left column: main dropdown items */}
+                        <div className="w-56 p-1">
+                          {item.dropdown.map((dropdownItem, index) => (
+                            <div key={dropdownItem.path} className="px-2 py-1">
                               <div className="flex items-center justify-between">
                                 <Router.Link
                                   to={dropdownItem.path}
-                                  className="text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors px-2 py-1 rounded-md"
+                                  className="text-sm text-foreground hover:text-solar-700 transition-colors px-2 py-1"
                                   onClick={() => {
                                     setActiveDropdown(null);
                                     setOpenSub(null);
@@ -163,7 +160,7 @@ export default function Navigation() {
                                           : dropdownItem.name,
                                       );
                                     }}
-                                    className="p-1 rounded hover:bg-solar-50"
+                                    className="p-1 rounded"
                                   >
                                     <ChevronRight
                                       className={`w-4 h-4 text-muted-foreground transform transition-transform ${
@@ -175,25 +172,31 @@ export default function Navigation() {
                                   </button>
                                 )}
                               </div>
-
-                              {/* If Solar, render small sub-links only when expanded */}
-                              {dropdownItem.sub && openSub === dropdownItem.name && (
-                                <div className="mt-2 ml-3 space-y-1">
-                                  {dropdownItem.sub.map((subItem) => (
-                                    <Router.Link
-                                      key={subItem.path}
-                                      to={subItem.path}
-                                      className="block text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-md"
-                                      onClick={() => setActiveDropdown(null)}
-                                    >
-                                      {subItem.name}
-                                    </Router.Link>
-                                  ))}
-                                </div>
-                              )}
                             </div>
-                          </motion.div>
-                        ))}
+                          ))}
+                        </div>
+
+                        {/* Right column: subitems (shown when a dropdown item is selected) */}
+                        <div className="w-48 p-2">
+                          {item.dropdown.map((d) => {
+                            if (!d.sub) return null;
+                            if (openSub !== d.name) return null;
+                            return (
+                              <div key={d.name} className="space-y-1">
+                                {d.sub.map((sub) => (
+                                  <Router.Link
+                                    key={sub.path}
+                                    to={sub.path}
+                                    className="block text-sm text-foreground px-2 py-2 hover:text-solar-700 rounded-md"
+                                    onClick={() => setActiveDropdown(null)}
+                                  >
+                                    {sub.name}
+                                  </Router.Link>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
