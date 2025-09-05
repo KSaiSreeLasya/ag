@@ -191,8 +191,8 @@ export default function Admin() {
               <div className="mt-4">
                 <h3 className="font-medium">Resources</h3>
                 <ul className="mt-2 space-y-2 text-sm">
-                  {resources.map((r:any) => (
-                    <li key={r.id}>{r.title} — {r.resource_type}</li>
+                  {resources.map((r:any, idx:number) => (
+                    <li key={r.id ?? `resource-${idx}`}>{r.title} — {r.resource_type}</li>
                   ))}
                 </ul>
               </div>
