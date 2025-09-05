@@ -156,9 +156,23 @@ export default function Admin() {
               <h3 className="font-semibold">Add Resource</h3>
               <Input placeholder="Title" value={resourceForm.title} onChange={(e:any)=>setResourceForm({...resourceForm, title:e.target.value})} />
               <Input placeholder="Type (whitepaper/pdf/link)" value={resourceForm.resource_type} onChange={(e:any)=>setResourceForm({...resourceForm, resource_type:e.target.value})} />
-              <Input placeholder="File URL" value={resourceForm.file_url} onChange={(e:any)=>setResourceForm({...resourceForm, file_url:e.target.value})} />
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="resource-file"
+                  type="file"
+                  accept="*/*"
+                  onChange={(e:any) => {
+                    const f = e.target.files && e.target.files[0];
+                    handleFileChange(f);
+                  }}
+                />
+                <span className="text-sm text-muted-foreground">{uploading ? 'Uploading...' : resourceForm.file_url ? 'Uploaded' : 'No file'}</span>
+              </div>
+
+              <Input placeholder="File URL (override)" value={resourceForm.file_url} onChange={(e:any)=>setResourceForm({...resourceForm, file_url:e.target.value})} />
               <Textarea placeholder="Description" value={resourceForm.description} onChange={(e:any)=>setResourceForm({...resourceForm, description:e.target.value})} />
-              <Button type="submit">Create Resource</Button>
+              <Button type="submit" disabled={uploading}>Create Resource</Button>
             </form>
           </section>
         </div>
