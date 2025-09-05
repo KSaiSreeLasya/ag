@@ -6,20 +6,43 @@ import { Button } from "@/components/ui/button";
 import * as React from "react";
 
 export default function Contact() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = Object.fromEntries(new FormData(form).entries());
-    console.log("Contact form submitted:", data);
-    const btn = form.querySelector("button[type=submit]") as HTMLButtonElement;
-    if (btn) {
-      btn.textContent = "Sent";
-      btn.disabled = true;
-      setTimeout(() => {
-        btn.textContent = "Send Message";
+
+    const btn = form.querySelector("button[type=submit]") as HTMLButtonElement | null;
+    try {
+      if (btn) {
+        btn.textContent = "Sending...";
+        btn.disabled = true;
+      }
+      const resp = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        // show error toast
+        const { toast } = await import('sonner');
+        toast.error('Failed to send message');
+        console.error('Contact submit failed:', txt);
+        return;
+      }
+      // success
+      const { toast } = await import('sonner');
+      toast.success('Message sent — we will contact you shortly');
+      form.reset();
+    } catch (err) {
+      const { toast } = await import('sonner');
+      toast.error('Failed to send message');
+      console.error(err);
+    } finally {
+      if (btn) {
+        btn.textContent = 'Send Message';
         btn.disabled = false;
-        form.reset();
-      }, 1500);
+      }
     }
   };
 
