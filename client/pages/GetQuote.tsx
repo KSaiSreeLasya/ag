@@ -51,28 +51,28 @@ export default function GetQuote() {
         submitBtn.textContent = "Submitting...";
         submitBtn.disabled = true;
       }
-      const resp = await fetch('/api/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const resp = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!resp.ok) {
         const txt = await resp.text();
-        const { toast } = await import('sonner');
-        toast.error('Failed to submit quote');
-        console.error('Quote submit failed:', txt);
+        const { toast } = await import("sonner");
+        toast.error("Failed to submit quote");
+        console.error("Quote submit failed:", txt);
         return;
       }
-      const { toast } = await import('sonner');
-      toast.success('Quote request submitted — we will reach out soon');
+      const { toast } = await import("sonner");
+      toast.success("Quote request submitted — we will reach out soon");
       form.reset();
     } catch (err) {
-      const { toast } = await import('sonner');
-      toast.error('Failed to submit quote');
+      const { toast } = await import("sonner");
+      toast.error("Failed to submit quote");
       console.error(err);
     } finally {
       if (submitBtn) {
-        submitBtn.textContent = 'Submit Details';
+        submitBtn.textContent = "Submit Details";
         submitBtn.disabled = false;
       }
     }
@@ -83,55 +83,101 @@ export default function GetQuote() {
       <Navigation />
       <main className="pt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold mb-2 text-foreground">Get a Quote</h1>
-          <p className="text-muted-foreground mb-6">Choose your category and fill the form to receive a free consultation and quote.</p>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">
+            Get a Quote
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            Choose your category and fill the form to receive a free
+            consultation and quote.
+          </p>
 
-          <Tabs value={category} onValueChange={(v) => setCategory(v as Category)}>
+          <Tabs
+            value={category}
+            onValueChange={(v) => setCategory(v as Category)}
+          >
             <TabsList className="w-full grid grid-cols-3 gap-2 bg-transparent p-0 rounded-none">
-              <TabsTrigger value="residential" className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Residential</TabsTrigger>
-              <TabsTrigger value="housing" className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Housing Society</TabsTrigger>
-              <TabsTrigger value="commercial" className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Commercial</TabsTrigger>
+              <TabsTrigger
+                value="residential"
+                className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Residential
+              </TabsTrigger>
+              <TabsTrigger
+                value="housing"
+                className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Housing Society
+              </TabsTrigger>
+              <TabsTrigger
+                value="commercial"
+                className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Commercial
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             <section className="bg-white/80 p-6 rounded-xl shadow">
-              <h2 className="text-xl font-semibold mb-4 capitalize">{category} Quote Form</h2>
+              <h2 className="text-xl font-semibold mb-4 capitalize">
+                {category} Quote Form
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <input type="hidden" name="category" value={category} />
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Enter Your Name *</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Enter Your Name *
+                  </label>
                   <Input required name="name" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Whatsapp Number *</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Whatsapp Number *
+                  </label>
                   <Input required name="whatsapp" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Pin Code *</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Pin Code *
+                  </label>
                   <Input required name="pincode" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">What is your average monthly bill? *</label>
-                  <select required name="bill" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  <label className="block text-sm font-medium mb-1">
+                    What is your average monthly bill? *
+                  </label>
+                  <select
+                    required
+                    name="bill"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
                     <option value="">Select</option>
                     {billOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <input id="agree" type="checkbox" name="agree" required />
-                  <label htmlFor="agree" className="text-sm text-muted-foreground">I agree to terms of service & privacy policy</label>
+                  <label
+                    htmlFor="agree"
+                    className="text-sm text-muted-foreground"
+                  >
+                    I agree to terms of service & privacy policy
+                  </label>
                 </div>
 
                 <div>
-                  <Button type="submit" className="w-full">Submit Details</Button>
+                  <Button type="submit" className="w-full">
+                    Submit Details
+                  </Button>
                 </div>
               </form>
             </section>
