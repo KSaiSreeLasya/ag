@@ -165,8 +165,8 @@ export default function Admin() {
               <div className="mt-4">
                 <h3 className="font-medium">Recent Contacts</h3>
                 <ul className="mt-2 space-y-2 text-sm">
-                  {contacts.slice(0,10).map((c:any) => (
-                    <li key={c.id}>{c.name} — {c.email}</li>
+                  {contacts.slice(0,10).map((c:any, idx:number) => (
+                    <li key={c.id ?? `contact-${idx}`}>{c.name} — {c.email}</li>
                   ))}
                 </ul>
               </div>
