@@ -54,6 +54,7 @@ const App = () => (
           <Route path="/solutions/b2b" element={<B2B />} />
           <Route path="/solutions/b2c" element={<B2C />} />
           <Route path="/solutions/b2g" element={<B2G />} />
+          <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
