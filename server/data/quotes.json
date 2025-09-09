@@ -6,7 +6,6 @@
       "name": "Q",
       "whatsapp": "123",
       "pincode": "560001",
-      "bill": "3000-5000",
       "category": "residential"
     }
   },
@@ -17,8 +16,7 @@
       "category": "residential",
       "name": "Kotte Sai Sree Lasya",
       "whatsapp": "7984563210",
-      "pincode": "516003",
-      "bill": "3000-5000"
+      "pincode": "516003"
     }
   }
 ]
