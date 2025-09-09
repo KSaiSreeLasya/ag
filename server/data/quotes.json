@@ -10,5 +10,17 @@
       "agree": "on",
       "category": "residential"
     }
+  },
+  {
+    "id": "zivqeycu9r",
+    "receivedAt": "2025-09-09T10:38:55.052Z",
+    "payload": {
+      "category": "residential",
+      "name": "Kotte Sai Sree Lasya",
+      "whatsapp": "7984563210",
+      "pincode": "516003",
+      "bill": "3000-5000",
+      "agree": "on"
+    }
   }
 ]
