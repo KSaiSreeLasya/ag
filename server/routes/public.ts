@@ -81,7 +81,23 @@ router.post("/quotes", async (req, res) => {
     return res.status(201).json(result);
   } catch (err: any) {
     console.error("Public /quotes error:", err);
-    return res.status(500).json({ error: err.message });
+    // Fallback: persist locally
+    try {
+      const fs = await import("fs/promises");
+      const path = await import("path");
+      const dataDir = path.resolve(process.cwd(), "server", "data");
+      await fs.mkdir(dataDir, { recursive: true });
+      const file = path.join(dataDir, "quotes.json");
+      const existing = await fs.readFile(file, "utf-8").catch(() => "[]");
+      const arr = JSON.parse(existing || "[]");
+      const entry = { id: Math.random().toString(36).slice(2), receivedAt: new Date().toISOString(), payload: req.body };
+      arr.push(entry);
+      await fs.writeFile(file, JSON.stringify(arr, null, 2));
+      return res.status(201).json(entry);
+    } catch (fsErr) {
+      console.error("Failed to persist quote locally:", fsErr);
+      return res.status(500).json({ error: err.message });
+    }
   }
 });
 
