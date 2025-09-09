@@ -69,7 +69,9 @@ async function supabaseRequest(
 // Public submission endpoints
 router.post("/quotes", async (req, res) => {
   try {
-    const payload = req.body || {};
+    const payload = { ...(req.body || {}) };
+    // Remove UI-only fields that are not present in DB schema
+    delete payload.agree;
     const result = await supabaseRequest(
       "quotes",
       "POST",
