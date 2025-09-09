@@ -1,0 +1,22 @@
+[
+  {
+    "id": "fspe80b7v1",
+    "receivedAt": "2025-09-09T10:38:24.832Z",
+    "payload": {
+      "name": "Q",
+      "whatsapp": "123",
+      "pincode": "560001",
+      "category": "residential"
+    }
+  },
+  {
+    "id": "zivqeycu9r",
+    "receivedAt": "2025-09-09T10:38:55.052Z",
+    "payload": {
+      "category": "residential",
+      "name": "Kotte Sai Sree Lasya",
+      "whatsapp": "7984563210",
+      "pincode": "516003"
+    }
+  }
+]

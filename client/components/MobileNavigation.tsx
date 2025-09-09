@@ -129,6 +129,7 @@ export default function MobileNavigation() {
               className="h-8 w-auto object-contain"
               loading="eager"
               decoding="async"
+              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
             <span className="sr-only">AXISO Green Energy</span>
           </Router.Link>

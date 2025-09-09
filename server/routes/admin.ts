@@ -3,11 +3,13 @@ import { Router } from "express";
 const router = Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+// Use service role key for admin routes when available
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn(
-    "Supabase credentials not set (SUPABASE_URL/SUPABASE_KEY). Admin routes will fail until configured.",
+    "Supabase credentials not set (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or SUPABASE_KEY). Admin routes will fail until configured.",
   );
 }
 
@@ -20,11 +22,26 @@ async function supabaseRequest(
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error("Supabase not configured");
   }
-  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+
+  // Support Prefer: return=representation via query string like ?return=representation
+  let preferReturn = false;
+  let rawQuery = query || "";
+  if (rawQuery.startsWith("?")) rawQuery = rawQuery.slice(1);
+  const params = new URLSearchParams(rawQuery);
+  if (params.get("return") === "representation") {
+    preferReturn = true;
+    params.delete("return");
+  }
+  const queryString = params.toString();
+  const url = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${table}${queryString ? "?" + queryString : ""}`;
+
   const headers: Record<string, string> = {
     apikey: SUPABASE_KEY,
     Authorization: `Bearer ${SUPABASE_KEY}`,
   };
+  if (preferReturn) {
+    headers.Prefer = "return=representation";
+  }
   if (method === "GET") {
     headers.Accept = "application/json";
   }
@@ -127,6 +144,17 @@ router.get("/resources", async (req, res) => {
   try {
     const rows = await supabaseRequest(ALLOWED_TABLES.resources);
     res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Trigger sync of local pending entries to Supabase (uses service role key)
+router.post("/sync-local", async (req, res) => {
+  try {
+    const { syncLocalData } = await import("../lib/syncLocal");
+    const results = await syncLocalData(supabaseRequest);
+    res.json(results);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
