@@ -3,11 +3,12 @@ import { Router } from "express";
 const router = Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+// Use service role key for admin routes when available
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn(
-    "Supabase credentials not set (SUPABASE_URL/SUPABASE_KEY). Admin routes will fail until configured.",
+    "Supabase credentials not set (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or SUPABASE_KEY). Admin routes will fail until configured.",
   );
 }
 
