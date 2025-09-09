@@ -18,5 +18,29 @@
       "whatsapp": "7984563210",
       "pincode": "516003"
     }
+  },
+  {
+    "id": "ywfmty0fdib",
+    "receivedAt": "2025-09-09T11:10:04.723Z",
+    "payload": {
+      "category": "residential",
+      "name": "Kotte Sai Sree Lasya",
+      "whatsapp": "7984563210",
+      "pincode": "516003",
+      "bill": "7000-10000",
+      "agree": "on"
+    }
+  },
+  {
+    "id": "9ebve7jyu9b",
+    "receivedAt": "2025-09-09T11:11:09.738Z",
+    "payload": {
+      "category": "residential",
+      "name": "Pothulri Karthik Reddy",
+      "whatsapp": "7984563210",
+      "pincode": "516003",
+      "bill": "3000-5000",
+      "agree": "on"
+    }
   }
 ]
