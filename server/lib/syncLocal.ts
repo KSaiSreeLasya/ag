@@ -40,7 +40,29 @@ export async function syncLocalData(supabaseRequest: (table: string, method?: st
           const res = await supabaseRequest(table, "POST", payload, "?return=representation");
           successes.push(res);
         } catch (err) {
-          errors.push({ item, error: String(err && err.message ? err.message : err) });
+          const errMsg = String(err && (err as any).message ? (err as any).message : err);
+          // Heuristic: try common field renames for quotes (pincode -> postal_code, zipcode, pin)
+          let retried = false;
+          if (table === "quotes" && payload && (payload as any).pincode) {
+            const candidates = ["postal_code", "postcode", "zip", "zip_code", "zipcode", "pin"];
+            for (const cand of candidates) {
+              const cloned = { ...payload };
+              cloned[cand] = cloned.pincode;
+              delete cloned.pincode;
+              try {
+                const r2 = await supabaseRequest(table, "POST", cloned, "?return=representation");
+                successes.push(r2);
+                retried = true;
+                break;
+              } catch (err2) {
+                // continue
+              }
+            }
+          }
+
+          if (!retried) {
+            errors.push({ item, error: errMsg });
+          }
         }
       }
 
