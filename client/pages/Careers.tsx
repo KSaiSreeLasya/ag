@@ -28,12 +28,15 @@ import {
 } from "lucide-react";
 import ParticleSystem from "@/components/ParticleSystem";
 import FloatingActionButton from "@/components/FloatingActionButton";
+import ApplyForm from "@/components/ApplyForm";
 
 export default function Careers() {
   const heroRef = useRef(null);
   const jobsRef = useRef(null);
   const lifeRef = useRef(null);
   const [expandedJob, setExpandedJob] = useState<number | null>(null);
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<string>("");
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -581,7 +584,7 @@ export default function Careers() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <Button className="group-hover:bg-primary/90">
+                        <Button className="group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); setSelectedPosition(job.title); setApplyOpen(true); }}>
                           Apply Now
                         </Button>
                         <motion.div
@@ -646,7 +649,7 @@ export default function Careers() {
                           </div>
 
                           <div className="mt-6">
-                            <Button className="w-full" size="lg">
+                            <Button className="w-full" size="lg" onClick={() => { setSelectedPosition(job.title); setApplyOpen(true); }}>
                               Apply for this Position
                               <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
@@ -795,6 +798,7 @@ export default function Careers() {
 
       <Footer />
       <FloatingActionButton />
+      <ApplyForm open={applyOpen} onOpenChange={setApplyOpen} defaultPosition={selectedPosition} />
     </div>
   );
 }
