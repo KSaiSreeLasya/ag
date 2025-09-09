@@ -120,7 +120,7 @@ export default function Solutions() {
               </p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-8">
               {solutions.map((solution, idx) => (
                 <motion.div
                   key={idx}
@@ -132,7 +132,7 @@ export default function Solutions() {
                 >
                   <Link
                     to={solution.to}
-                    className="block p-8 rounded-2xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-green-200 relative overflow-hidden h-full"
+                    className="block p-10 rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-green-200 relative overflow-hidden min-h-[360px]"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="relative z-10">

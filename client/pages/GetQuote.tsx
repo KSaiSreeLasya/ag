@@ -1,7 +1,10 @@
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Category = "residential" | "housing" | "commercial";
 
@@ -19,23 +22,68 @@ export default function GetQuote() {
     }
   }, [location.hash]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const billOptions = React.useMemo(() => {
+    if (category === "commercial") {
+      return [
+        { value: "10000-20000", label: "₹10,000 - ₹20,000" },
+        { value: "20000-30000", label: "₹20,000 - ₹30,000" },
+        { value: "30000-40000", label: "₹30,000 - ₹40,000" },
+        { value: "40000-50000", label: "₹40,000 - ₹50,000" },
+      ];
+    }
+    return [
+      { value: "3000-5000", label: "₹3,000 - ₹5,000" },
+      { value: "5000-7000", label: "₹5,000 - ₹7,000" },
+      { value: "7000-10000", label: "₹7,000 - ₹10,000" },
+    ];
+  }, [category]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = Object.fromEntries(new FormData(form).entries());
-    // Placeholder: you can replace with API call
-    console.log("Get Quote submitted:", { category, ...data });
-    // Simple UI feedback
+    const payload = { category, ...data };
     const submitBtn = form.querySelector(
       "button[type=submit]",
-    ) as HTMLButtonElement;
-    if (submitBtn) {
-      submitBtn.textContent = "Submitted";
-      submitBtn.disabled = true;
-      setTimeout(() => {
+    ) as HTMLButtonElement | null;
+    try {
+      if (submitBtn) {
+        submitBtn.textContent = "Submitting...";
+        submitBtn.disabled = true;
+      }
+      const resp = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) {
+        let body: any = null;
+        try {
+          body = await resp.json();
+        } catch {
+          try {
+            body = await resp.text();
+          } catch {
+            body = null;
+          }
+        }
+        const { toast } = await import("sonner");
+        toast.error("Failed to submit quote");
+        console.error("Quote submit failed:", body);
+        return;
+      }
+      const { toast } = await import("sonner");
+      toast.success("Quote request submitted — we will reach out soon");
+      form.reset();
+    } catch (err) {
+      const { toast } = await import("sonner");
+      toast.error("Failed to submit quote");
+      console.error(err);
+    } finally {
+      if (submitBtn) {
         submitBtn.textContent = "Submit Details";
         submitBtn.disabled = false;
-      }, 2000);
+      }
     }
   };
 
@@ -43,7 +91,7 @@ export default function GetQuote() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <main className="pt-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="text-3xl font-bold mb-2 text-foreground">
             Get a Quote
           </h1>
@@ -52,77 +100,37 @@ export default function GetQuote() {
             consultation and quote.
           </p>
 
-          <div className="flex flex-col md:flex-row gap-6">
-            <aside className="w-full md:w-1/3">
-              <div className="space-y-3">
-                <button
-                  onClick={() => setCategory("residential")}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-all border ${
-                    category === "residential"
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background border-border"
-                  }`}
-                >
-                  Residential
-                </button>
-                <button
-                  onClick={() => setCategory("housing")}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-all border ${
-                    category === "housing"
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background border-border"
-                  }`}
-                >
-                  Housing Society
-                </button>
-                <button
-                  onClick={() => setCategory("commercial")}
-                  className={`w-full text-left px-4 py-2 rounded-lg transition-all border ${
-                    category === "commercial"
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background border-border"
-                  }`}
-                >
-                  Commercial
-                </button>
-              </div>
+          <Tabs
+            value={category}
+            onValueChange={(v) => setCategory(v as Category)}
+          >
+            <TabsList className="w-full grid grid-cols-3 gap-2 bg-transparent p-0 rounded-none">
+              <TabsTrigger
+                value="residential"
+                className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Residential
+              </TabsTrigger>
+              <TabsTrigger
+                value="housing"
+                className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Housing Society
+              </TabsTrigger>
+              <TabsTrigger
+                value="commercial"
+                className="h-12 w-full rounded-md border data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Commercial
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-              <div className="mt-6 text-sm text-muted-foreground">
-                <p className="font-medium mb-2">Quick Links</p>
-                <ul className="space-y-1">
-                  <li>
-                    <Link
-                      to="/solutions#solar"
-                      className="text-primary hover:underline"
-                    >
-                      Solar Energy Solutions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/solutions#wind"
-                      className="text-primary hover:underline"
-                    >
-                      Wind Energy Services
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/contact"
-                      className="text-primary hover:underline"
-                    >
-                      Contact our team
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </aside>
-
-            <section className="w-full md:w-2/3 bg-white/80 p-6 rounded-xl shadow">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <section className="bg-white/80 p-6 rounded-xl shadow">
               <h2 className="text-xl font-semibold mb-4 capitalize">
                 {category} Quote Form
               </h2>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <input type="hidden" name="category" value={category} />
 
@@ -130,33 +138,21 @@ export default function GetQuote() {
                   <label className="block text-sm font-medium mb-1">
                     Enter Your Name *
                   </label>
-                  <input
-                    required
-                    name="name"
-                    className="w-full border border-border rounded-md px-3 py-2"
-                  />
+                  <Input required name="name" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Whatsapp Number *
                   </label>
-                  <input
-                    required
-                    name="whatsapp"
-                    className="w-full border border-border rounded-md px-3 py-2"
-                  />
+                  <Input required name="whatsapp" />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Pin Code *
                   </label>
-                  <input
-                    required
-                    name="pincode"
-                    className="w-full border border-border rounded-md px-3 py-2"
-                  />
+                  <Input required name="pincode" />
                 </div>
 
                 <div>
@@ -166,12 +162,14 @@ export default function GetQuote() {
                   <select
                     required
                     name="bill"
-                    className="w-full border border-border rounded-md px-3 py-2"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <option value="">Select</option>
-                    <option value="<1000">Below ₹1,000</option>
-                    <option value="1000-5000">₹1,000 - ₹5,000</option>
-                    <option value=">5000">Above ₹5,000</option>
+                    {billOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -186,15 +184,20 @@ export default function GetQuote() {
                 </div>
 
                 <div>
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-primary text-primary-foreground rounded-md"
-                  >
+                  <Button type="submit" className="w-full">
                     Submit Details
-                  </button>
+                  </Button>
                 </div>
               </form>
             </section>
+
+            <aside className="hidden md:block">
+              <img
+                src="/placeholder.svg"
+                alt="Solar quote illustration"
+                className="w-full h-full object-cover rounded-xl border"
+              />
+            </aside>
           </div>
         </div>
       </main>
