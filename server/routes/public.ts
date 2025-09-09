@@ -3,11 +3,12 @@ import { Router } from "express";
 const router = Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+// Use explicit SUPABASE_KEY if provided, otherwise fall back to anon key for public routes
+const SUPABASE_KEY = process.env.SUPABASE_KEY ?? process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn(
-    "Supabase credentials not set (SUPABASE_URL/SUPABASE_KEY). Public submission routes will fail until configured.",
+    "Supabase credentials not set (SUPABASE_URL and SUPABASE_KEY or SUPABASE_ANON_KEY). Public submission routes will fail until configured.",
   );
 }
 
