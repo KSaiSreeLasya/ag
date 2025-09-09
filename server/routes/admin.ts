@@ -148,6 +148,17 @@ router.get("/resources", async (req, res) => {
   }
 });
 
+// Trigger sync of local pending entries to Supabase (uses service role key)
+router.post("/sync-local", async (req, res) => {
+  try {
+    const { syncLocalData } = await import("@/lib/syncLocal");
+    const results = await syncLocalData(supabaseRequest);
+    res.json(results);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create job
 router.post("/jobs", async (req, res) => {
   try {
