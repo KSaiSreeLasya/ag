@@ -18,8 +18,11 @@ async function supabaseRequest(
   body?: any,
   query = "",
 ) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
-    throw new Error("Supabase not configured");
+  if (!SUPABASE_URL) {
+    throw new Error("Missing SUPABASE_URL");
+  }
+  if (!SUPABASE_KEY) {
+    throw new Error("Missing SUPABASE_KEY or SUPABASE_ANON_KEY");
   }
   const url = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${table}${query}`;
   const headers: Record<string, string> = {
