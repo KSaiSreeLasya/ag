@@ -83,9 +83,9 @@ export function createServer() {
               };
 
               const results = await syncLocalData(supabaseReq);
-              // log results
+              // log full results as JSON
               // eslint-disable-next-line no-console
-              console.log("Local sync results:", results);
+              console.log("Local sync results:", JSON.stringify(results, null, 2));
             }
           }
         } catch (e) {
