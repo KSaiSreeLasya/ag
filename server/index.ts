@@ -47,9 +47,15 @@ export function createServer() {
             // NOTE: admin exports supabaseRequest function? It doesn't; instead reuse internal by importing routes file's helper is not straightforward.
             // To avoid circular imports, re-create a minimal supabaseRequest here using env keys
             const SUPABASE_URL = process.env.SUPABASE_URL;
-            const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
+            const SUPABASE_KEY =
+              process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
             if (SUPABASE_URL && SUPABASE_KEY) {
-              const supabaseReq = async (table: string, method = "GET", body?: any, query = "") => {
+              const supabaseReq = async (
+                table: string,
+                method = "GET",
+                body?: any,
+                query = "",
+              ) => {
                 // Construct URL and headers similar to admin supabaseRequest
                 let preferReturn = false;
                 let rawQuery = query || "";
@@ -75,7 +81,9 @@ export function createServer() {
                 });
                 if (!res.ok) {
                   const text = await res.text().catch(() => "");
-                  throw new Error(`Supabase request failed: status=${res.status} statusText=${res.statusText} url=${url} body=${text}`);
+                  throw new Error(
+                    `Supabase request failed: status=${res.status} statusText=${res.statusText} url=${url} body=${text}`,
+                  );
                 }
                 const contentType = res.headers.get("content-type") || "";
                 if (contentType.includes("application/json")) return res.json();
@@ -85,7 +93,10 @@ export function createServer() {
               const results = await syncLocalData(supabaseReq);
               // log full results as JSON
               // eslint-disable-next-line no-console
-              console.log("Local sync results:", JSON.stringify(results, null, 2));
+              console.log(
+                "Local sync results:",
+                JSON.stringify(results, null, 2),
+              );
             }
           }
         } catch (e) {

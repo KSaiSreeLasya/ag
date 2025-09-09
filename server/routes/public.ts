@@ -90,7 +90,11 @@ router.post("/quotes", async (req, res) => {
       const file = path.join(dataDir, "quotes.json");
       const existing = await fs.readFile(file, "utf-8").catch(() => "[]");
       const arr = JSON.parse(existing || "[]");
-      const entry = { id: Math.random().toString(36).slice(2), receivedAt: new Date().toISOString(), payload: req.body };
+      const entry = {
+        id: Math.random().toString(36).slice(2),
+        receivedAt: new Date().toISOString(),
+        payload: req.body,
+      };
       arr.push(entry);
       await fs.writeFile(file, JSON.stringify(arr, null, 2));
       return res.status(201).json(entry);
@@ -124,7 +128,11 @@ router.post("/contacts", async (req, res) => {
       const file = path.join(dataDir, "contacts.json");
       const existing = await fs.readFile(file, "utf-8").catch(() => "[]");
       const arr = JSON.parse(existing || "[]");
-      const entry = { id: Math.random().toString(36).slice(2), receivedAt: new Date().toISOString(), payload: req.body };
+      const entry = {
+        id: Math.random().toString(36).slice(2),
+        receivedAt: new Date().toISOString(),
+        payload: req.body,
+      };
       arr.push(entry);
       await fs.writeFile(file, JSON.stringify(arr, null, 2));
       return res.status(201).json(entry);

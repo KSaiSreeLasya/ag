@@ -4,7 +4,8 @@ const router = Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 // Use service role key for admin routes when available
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn(

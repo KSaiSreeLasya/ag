@@ -42,29 +42,29 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/solutions" element={<Solutions />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/advisory" element={<Advisory />} />
-          <Route path="/procurement" element={<Procurement />} />
-          <Route path="/digital-solutions" element={<DigitalSolutions />} />
-          <Route path="/sectors" element={<Sectors />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/get-quote" element={<GetQuote />} />
-          <Route path="/solutions/solar" element={<Solar />} />
-          <Route path="/solutions/wind" element={<Wind />} />
-          <Route path="/solutions/storage" element={<Storage />} />
-          <Route path="/solutions/ev-stations" element={<EVStations />} />
-          <Route path="/solutions/b2b" element={<B2B />} />
-          <Route path="/solutions/b2c" element={<B2C />} />
-          <Route path="/solutions/b2g" element={<B2G />} />
-          <Route path="/admin" element={<Admin />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="/" element={<Index />} />
+            <Route path="/solutions" element={<Solutions />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/advisory" element={<Advisory />} />
+            <Route path="/procurement" element={<Procurement />} />
+            <Route path="/digital-solutions" element={<DigitalSolutions />} />
+            <Route path="/sectors" element={<Sectors />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/get-quote" element={<GetQuote />} />
+            <Route path="/solutions/solar" element={<Solar />} />
+            <Route path="/solutions/wind" element={<Wind />} />
+            <Route path="/solutions/storage" element={<Storage />} />
+            <Route path="/solutions/ev-stations" element={<EVStations />} />
+            <Route path="/solutions/b2b" element={<B2B />} />
+            <Route path="/solutions/b2c" element={<B2C />} />
+            <Route path="/solutions/b2g" element={<B2G />} />
+            <Route path="/admin" element={<Admin />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
       </TooltipProvider>
     </ErrorBoundary>
   </QueryClientProvider>

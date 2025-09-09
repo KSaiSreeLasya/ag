@@ -37,7 +37,10 @@ export default function Contact() {
         }
         const { toast } = await import("sonner");
         // Prefer to show a friendly message, but log details for debugging
-        const debugMsg = (body && (body.error || body.message)) || body || `status=${resp.status}`;
+        const debugMsg =
+          (body && (body.error || body.message)) ||
+          body ||
+          `status=${resp.status}`;
         toast.error("Failed to send message");
         console.error("Contact submit failed:", debugMsg);
         return;

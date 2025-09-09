@@ -3,7 +3,14 @@ import path from "path";
 
 type Result = { table: string; success: number; failed: number; errors: any[] };
 
-export async function syncLocalData(supabaseRequest: (table: string, method?: string, body?: any, query?: string) => Promise<any>) {
+export async function syncLocalData(
+  supabaseRequest: (
+    table: string,
+    method?: string,
+    body?: any,
+    query?: string,
+  ) => Promise<any>,
+) {
   const dataDir = path.resolve(process.cwd(), "server", "data");
   const results: Result[] = [];
 
@@ -37,20 +44,39 @@ export async function syncLocalData(supabaseRequest: (table: string, method?: st
         delete payload.subject;
         delete payload.bill;
         try {
-          const res = await supabaseRequest(table, "POST", payload, "?return=representation");
+          const res = await supabaseRequest(
+            table,
+            "POST",
+            payload,
+            "?return=representation",
+          );
           successes.push(res);
         } catch (err) {
-          const errMsg = String(err && (err as any).message ? (err as any).message : err);
+          const errMsg = String(
+            err && (err as any).message ? (err as any).message : err,
+          );
           // Heuristic: try common field renames for quotes (pincode -> postal_code, zipcode, pin)
           let retried = false;
           if (table === "quotes" && payload && (payload as any).pincode) {
-            const candidates = ["postal_code", "postcode", "zip", "zip_code", "zipcode", "pin"];
+            const candidates = [
+              "postal_code",
+              "postcode",
+              "zip",
+              "zip_code",
+              "zipcode",
+              "pin",
+            ];
             for (const cand of candidates) {
               const cloned = { ...payload };
               cloned[cand] = cloned.pincode;
               delete cloned.pincode;
               try {
-                const r2 = await supabaseRequest(table, "POST", cloned, "?return=representation");
+                const r2 = await supabaseRequest(
+                  table,
+                  "POST",
+                  cloned,
+                  "?return=representation",
+                );
                 successes.push(r2);
                 retried = true;
                 break;
@@ -73,14 +99,23 @@ export async function syncLocalData(supabaseRequest: (table: string, method?: st
       } else {
         // keep only failed items
         const failed = arr.filter((it) => errors.find((e) => e.item === it));
-        await fs.writeFile(filePath, JSON.stringify(failed, null, 2)).catch(() => {});
+        await fs
+          .writeFile(filePath, JSON.stringify(failed, null, 2))
+          .catch(() => {});
       }
 
-      results.push({ table, success: successes.length, failed: errors.length, errors });
+      results.push({
+        table,
+        success: successes.length,
+        failed: errors.length,
+        errors,
+      });
     }
   } catch (err) {
     // return top-level error
-    return { error: String(err && (err as any).message ? (err as any).message : err) };
+    return {
+      error: String(err && (err as any).message ? (err as any).message : err),
+    };
   }
 
   return results;

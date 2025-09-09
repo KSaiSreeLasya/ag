@@ -26,12 +26,17 @@ export default function Admin() {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-        <p className="text-muted-foreground mb-6">Analytics and form exports.</p>
+        <p className="text-muted-foreground mb-6">
+          Analytics and form exports.
+        </p>
         <div className="space-y-4">
           <Button onClick={handleExport}>Export all forms (XLSX)</Button>
           <div className="border rounded p-4">
             <h2 className="font-semibold mb-2">Form submissions (preview)</h2>
-            <p className="text-sm text-muted-foreground">No data yet — connect Supabase and implement server export endpoints to populate this area.</p>
+            <p className="text-sm text-muted-foreground">
+              No data yet — connect Supabase and implement server export
+              endpoints to populate this area.
+            </p>
           </div>
         </div>
       </div>
