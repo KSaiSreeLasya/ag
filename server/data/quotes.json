@@ -1,0 +1,14 @@
+[
+  {
+    "id": "fspe80b7v1",
+    "receivedAt": "2025-09-09T10:38:24.832Z",
+    "payload": {
+      "name": "Q",
+      "whatsapp": "123",
+      "pincode": "560001",
+      "bill": "3000-5000",
+      "agree": "on",
+      "category": "residential"
+    }
+  }
+]
