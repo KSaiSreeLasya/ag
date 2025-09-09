@@ -48,12 +48,14 @@ export default function Navigation() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Router.Link to="/" className="flex items-center space-x-3">
+              {/* Logo with safe fallback for external image failures */}
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2F59bf3e928fc9473a97d5e87470c824bb%2F661e86d7a74f464c89095a37afa49cbd?format=webp&width=800"
                 alt="AXISO Green Energy logo"
                 className="h-10 w-auto object-contain"
                 loading="eager"
                 decoding="async"
+                onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
               />
               <span className="sr-only">AXISO Green Energy</span>
             </Router.Link>
