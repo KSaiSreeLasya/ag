@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as Router from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sun, ChevronDown, Menu, X } from "lucide-react";
+import { Sun, ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import MobileNavigation from "@/components/MobileNavigation";
@@ -10,11 +10,26 @@ export default function Navigation() {
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(
     null,
   );
+  const [openSub, setOpenSub] = React.useState<string | null>(null);
   const location = Router.useLocation();
+  const navigate = Router.useNavigate();
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Solutions", path: "/solutions" },
+    {
+      name: "Solutions",
+      path: "/solutions",
+      dropdown: [
+        { name: "Solar", path: "/solutions/solar", sub: [
+          { name: "Residential (B2C)", path: "/solutions/b2c" },
+          { name: "Commercial (B2B)", path: "/solutions/b2b" },
+          { name: "Government (B2G)", path: "/solutions/b2g" },
+        ] },
+        { name: "Wind", path: "/solutions/wind" },
+        { name: "Energy Storage", path: "/solutions/storage" },
+        { name: "EV Stations", path: "/solutions/ev-stations" },
+      ],
+    },
     {
       name: "Services",
       path: "#",
@@ -73,6 +88,11 @@ export default function Navigation() {
                 >
                   {item.dropdown ? (
                     <button
+                      onClick={() => {
+                        if (item.path && item.path !== "#") navigate(item.path);
+                      }}
+                      aria-haspopup={!!item.dropdown}
+                      aria-expanded={activeDropdown === item.name}
                       className={cn(
                         "flex items-center space-x-1 px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg hover:bg-solar-50",
                         "text-foreground hover:text-solar-700",
@@ -106,28 +126,79 @@ export default function Navigation() {
                   <AnimatePresence>
                     {item.dropdown && activeDropdown === item.name && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-1 w-56 bg-white/95 backdrop-blur-md border border-solar-200 rounded-xl shadow-lg py-2"
+                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 mt-1 rounded-xl shadow-lg py-2 flex"
+                        style={{ minWidth: 220 }}
                       >
-                        {item.dropdown.map((dropdownItem, index) => (
-                          <motion.div
-                            key={dropdownItem.path}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                          >
-                            <Router.Link
-                              to={dropdownItem.path}
-                              className="block px-4 py-2 text-sm text-foreground hover:text-solar-700 hover:bg-solar-50 transition-colors"
-                              onClick={() => setActiveDropdown(null)}
-                            >
-                              {dropdownItem.name}
-                            </Router.Link>
-                          </motion.div>
-                        ))}
+                        {/* Left column: main dropdown items */}
+                        <div className="w-56 p-1">
+                          {item.dropdown.map((dropdownItem, index) => (
+                            <div key={dropdownItem.path} className="px-2 py-1">
+                              <div className="flex items-center justify-between">
+                                <Router.Link
+                                  to={dropdownItem.path}
+                                  className="text-sm text-foreground hover:text-solar-700 transition-colors px-2 py-1"
+                                  onClick={() => {
+                                    setActiveDropdown(null);
+                                    setOpenSub(null);
+                                  }}
+                                >
+                                  {dropdownItem.name}
+                                </Router.Link>
+
+                                {dropdownItem.sub && (
+                                  <button
+                                    type="button"
+                                    aria-label={openSub === dropdownItem.name ? "Collapse" : "Expand"}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      setOpenSub(
+                                        openSub === dropdownItem.name
+                                          ? null
+                                          : dropdownItem.name,
+                                      );
+                                    }}
+                                    className="p-1 rounded"
+                                  >
+                                    <ChevronRight
+                                      className={`w-4 h-4 text-muted-foreground transform transition-transform ${
+                                        openSub === dropdownItem.name
+                                          ? "rotate-90"
+                                          : ""
+                                      }`}
+                                    />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Right column: subitems (shown when a dropdown item is selected) */}
+                        <div className="w-48 p-2">
+                          {item.dropdown.map((d) => {
+                            if (!d.sub) return null;
+                            if (openSub !== d.name) return null;
+                            return (
+                              <div key={d.name} className="space-y-1">
+                                {d.sub.map((sub) => (
+                                  <Router.Link
+                                    key={sub.path}
+                                    to={sub.path}
+                                    className="block text-sm text-foreground px-2 py-2 hover:text-solar-700 rounded-md"
+                                    onClick={() => setActiveDropdown(null)}
+                                  >
+                                    {sub.name}
+                                  </Router.Link>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

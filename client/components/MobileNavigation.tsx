@@ -23,6 +23,7 @@ export default function MobileNavigation() {
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(
     null,
   );
+  const [mobileSubOpen, setMobileSubOpen] = React.useState<string | null>(null);
   const location = Router.useLocation();
 
   // Close mobile menu when route changes
@@ -50,7 +51,25 @@ export default function MobileNavigation() {
       href: "/",
       icon: Home,
     },
-    { title: "Solutions", href: "/solutions", icon: Sun },
+    {
+      title: "Solutions",
+      href: "/solutions",
+      icon: Sun,
+      submenu: [
+        {
+          title: "Solar",
+          href: "/solutions/solar",
+          sub: [
+            { title: "Residential (B2C)", href: "/solutions/b2c" },
+            { title: "Commercial (B2B)", href: "/solutions/b2b" },
+            { title: "Government (B2G)", href: "/solutions/b2g" },
+          ],
+        },
+        { title: "Wind", href: "/solutions/wind" },
+        { title: "Energy Storage", href: "/solutions/storage" },
+        { title: "EV Stations", href: "/solutions/ev-stations" },
+      ],
+    },
     {
       title: "Services",
       href: "#",
@@ -172,7 +191,7 @@ export default function MobileNavigation() {
               <div className="p-6">
                 {/* Navigation Items */}
                 <div className="space-y-2 mb-8">
-                  {navigationItems.map((item, index) => (
+                  {!mobileSubOpen && navigationItems.map((item, index) => (
                     <motion.div
                       key={item.title}
                       initial={{ opacity: 0, x: 20 }}
@@ -215,13 +234,25 @@ export default function MobileNavigation() {
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: subIndex * 0.05 }}
                                   >
-                                    <Router.Link
-                                      to={subItem.href}
-                                      className="block p-2 text-sm text-muted-foreground hover:text-solar-600 hover:bg-solar-50 rounded-lg transition-colors"
-                                      onClick={() => setIsOpen(false)}
-                                    >
-                                      {subItem.title}
-                                    </Router.Link>
+                                    <div className="flex items-center justify-between">
+                                      <Router.Link
+                                        to={subItem.href}
+                                        className="block p-2 text-sm text-muted-foreground hover:text-solar-600 hover:bg-solar-50 rounded-lg transition-colors"
+                                        onClick={() => setIsOpen(false)}
+                                      >
+                                        {subItem.title}
+                                      </Router.Link>
+
+                                      {/* if subItem has nested sub, show chevron to open nested panel */}
+                                      {subItem.sub && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); setMobileSubOpen(subItem.title); }}
+                                          className="p-1 rounded hover:bg-solar-50"
+                                        >
+                                          <ChevronDown className="w-4 h-4 text-muted-foreground transform rotate-0" />
+                                        </button>
+                                      )}
+                                    </div>
                                   </motion.div>
                                 ))}
                               </motion.div>
@@ -240,6 +271,21 @@ export default function MobileNavigation() {
                       )}
                     </motion.div>
                   ))}
+
+                  {/* If a nested mobile sub is open, render its panel */}
+                  {mobileSubOpen && (
+                    <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 50, opacity: 0 }} className="bg-white p-2 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <button onClick={() => setMobileSubOpen(null)} className="p-2 rounded hover:bg-solar-50">Back</button>
+                        <div className="font-semibold">{mobileSubOpen}</div>
+                      </div>
+                      <div className="space-y-1">
+                        {navigationItems.flatMap(i => i.submenu || []).find(s => s.title === mobileSubOpen)?.sub?.map(si => (
+                          <Router.Link key={si.href} to={si.href} onClick={() => setIsOpen(false)} className="block p-2 rounded hover:bg-solar-50 text-sm text-foreground">{si.title}</Router.Link>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
                 {/* CTA Buttons */}
