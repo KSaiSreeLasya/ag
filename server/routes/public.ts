@@ -24,13 +24,30 @@ async function supabaseRequest(
   if (!SUPABASE_KEY) {
     throw new Error("Missing SUPABASE_KEY or SUPABASE_ANON_KEY");
   }
-  const url = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${table}${query}`;
+
+  // Normalize query and support Prefer: return=representation
+  let preferReturn = false;
+  let rawQuery = query || "";
+  if (rawQuery.startsWith("?")) rawQuery = rawQuery.slice(1);
+  // if query contains return=representation, remove it and set Prefer header
+  const params = new URLSearchParams(rawQuery);
+  if (params.get("return") === "representation") {
+    preferReturn = true;
+    params.delete("return");
+  }
+  const queryString = params.toString();
+  const url = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${table}${queryString ? "?" + queryString : ""}`;
+
   const headers: Record<string, string> = {
     apikey: SUPABASE_KEY,
     Authorization: `Bearer ${SUPABASE_KEY}`,
   };
+  if (preferReturn) {
+    headers.Prefer = "return=representation";
+  }
   if (method === "GET") headers.Accept = "application/json";
   if (body) headers["Content-Type"] = "application/json";
+
   const res = await fetch(url, {
     method,
     headers,
