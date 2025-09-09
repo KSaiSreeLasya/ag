@@ -33,6 +33,9 @@ export async function syncLocalData(supabaseRequest: (table: string, method?: st
         const payload = item.payload ?? item.application ?? item;
         // remove probable UI-only props
         delete payload.agree;
+        // remove fields that may not exist in DB schema
+        delete payload.subject;
+        delete payload.bill;
         try {
           const res = await supabaseRequest(table, "POST", payload, "?return=representation");
           successes.push(res);
