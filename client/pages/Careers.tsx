@@ -502,16 +502,20 @@ export default function Careers() {
                             {(() => {
                               const reqs = Array.isArray(job.requirements)
                                 ? job.requirements
-                                : typeof job.requirements === 'string'
-                                ? (() => {
-                                    try {
-                                      const parsed = JSON.parse(job.requirements);
-                                      return Array.isArray(parsed) ? parsed : [];
-                                    } catch (e) {
-                                      return [];
-                                    }
-                                  })()
-                                : [];
+                                : typeof job.requirements === "string"
+                                  ? (() => {
+                                      try {
+                                        const parsed = JSON.parse(
+                                          job.requirements,
+                                        );
+                                        return Array.isArray(parsed)
+                                          ? parsed
+                                          : [];
+                                      } catch (e) {
+                                        return [];
+                                      }
+                                    })()
+                                  : [];
                               return reqs.map((req: any, reqIndex: number) => (
                                 <li
                                   key={reqIndex}
@@ -533,25 +537,29 @@ export default function Careers() {
                             {(() => {
                               const bens = Array.isArray(job.benefits)
                                 ? job.benefits
-                                : typeof job.benefits === 'string'
-                                ? (() => {
-                                    try {
-                                      const parsed = JSON.parse(job.benefits);
-                                      return Array.isArray(parsed) ? parsed : [];
-                                    } catch (e) {
-                                      return [];
-                                    }
-                                  })()
-                                : [];
-                              return bens.map((benefit: any, benefitIndex: number) => (
-                                <Badge
-                                  key={benefitIndex}
-                                  variant="secondary"
-                                  className="mr-2 mb-2"
-                                >
-                                  {benefit}
-                                </Badge>
-                              ));
+                                : typeof job.benefits === "string"
+                                  ? (() => {
+                                      try {
+                                        const parsed = JSON.parse(job.benefits);
+                                        return Array.isArray(parsed)
+                                          ? parsed
+                                          : [];
+                                      } catch (e) {
+                                        return [];
+                                      }
+                                    })()
+                                  : [];
+                              return bens.map(
+                                (benefit: any, benefitIndex: number) => (
+                                  <Badge
+                                    key={benefitIndex}
+                                    variant="secondary"
+                                    className="mr-2 mb-2"
+                                  >
+                                    {benefit}
+                                  </Badge>
+                                ),
+                              );
                             })()}
                           </div>
 
