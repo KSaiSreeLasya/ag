@@ -365,14 +365,11 @@ router.get("/export-xlsx", async (req, res) => {
     const WorkbookCtor = ExcelJS.Workbook || (ExcelJS && ExcelJS.Workbook) || (excelModule && excelModule.default && excelModule.default.Workbook);
     if (!WorkbookCtor) throw new Error("ExcelJS.Workbook constructor not found");
     const workbook = new WorkbookCtor();
-    const tables = [
-      "quotes",
-      "contacts",
-      "applications",
-      "job_applications",
-      "jobs",
-      "resources",
-    ];
+
+    // support query param tables=quotes,contacts,applications (comma separated)
+    const q = String(req.query.tables || "").trim();
+    const tables = q ? q.split(",").map((s) => s.trim()).filter(Boolean) : ["quotes", "contacts", "applications"];
+
     for (const t of tables) {
       let rows: any[] = [];
       try {
