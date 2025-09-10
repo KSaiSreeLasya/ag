@@ -41,6 +41,12 @@ export const handleApply: RequestHandler = (req, res) => {
 
       const parse = applicationSchema.safeParse(input);
       if (!parse.success) {
+        // Log full debug info to server console for troubleshooting
+        console.error("Apply validation failed", {
+          rawBody: rawBody,
+          errors: parse.error.format(),
+          flattened: parse.error.flatten(),
+        });
         return res.status(400).json({ error: "Invalid input", details: parse.error.flatten() });
       }
 
