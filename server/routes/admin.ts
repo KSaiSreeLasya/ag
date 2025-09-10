@@ -335,4 +335,50 @@ router.get("/export-forms", async (req, res) => {
   }
 });
 
+// Multi-sheet XLSX export (each table in its own sheet)
+router.get("/export-xlsx", async (req, res) => {
+  try {
+    const ExcelJS = await import("exceljs");
+    const workbook = new ExcelJS.Workbook();
+    const tables = ["quotes", "contacts", "applications", "job_applications", "jobs", "resources"];
+    for (const t of tables) {
+      let rows: any[] = [];
+      try {
+        rows = (await supabaseRequest(t)) || [];
+      } catch (e: any) {
+        rows = [];
+      }
+      const sheet = workbook.addWorksheet(t.substring(0, 31)); // sheet name max 31 chars
+      if (!rows || rows.length === 0) {
+        sheet.addRow(["(no rows)"]);
+        continue;
+      }
+      const columns = Object.keys(rows[0]);
+      sheet.addRow(columns);
+      for (const r of rows) {
+        const row = columns.map((c) => {
+          const v = r[c];
+          if (v === null || v === undefined) return "";
+          if (typeof v === "object") return JSON.stringify(v);
+          return String(v);
+        });
+        sheet.addRow(row);
+      }
+    }
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=all_forms.xlsx`,
+    );
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
