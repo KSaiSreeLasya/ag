@@ -72,9 +72,15 @@ async function supabaseRequest(
 // Public submission endpoints
 router.post("/quotes", async (req, res) => {
   try {
-    const payload = { ...(req.body || {}) };
+    const body = { ...(req.body || {}) };
     // Remove UI-only fields that are not present in DB schema
-    delete payload.agree;
+    delete (body as any).agree;
+    // Whitelist allowed columns for safety
+    const allowed = ["name", "whatsapp", "pincode", "bill", "category"] as const;
+    const payload = Object.fromEntries(
+      Object.entries(body).filter(([k]) => (allowed as readonly string[]).includes(k))
+    );
+
     const result = await supabaseRequest(
       "quotes",
       "POST",
@@ -110,9 +116,15 @@ router.post("/quotes", async (req, res) => {
 
 router.post("/contacts", async (req, res) => {
   try {
-    const payload = { ...(req.body || {}) };
+    const body = { ...(req.body || {}) };
     // Remove UI-only fields that are not present in DB schema
-    delete payload.agree;
+    delete (body as any).agree;
+    // Whitelist allowed columns for safety
+    const allowed = ["name", "email", "phone", "subject", "message"] as const;
+    const payload = Object.fromEntries(
+      Object.entries(body).filter(([k]) => (allowed as readonly string[]).includes(k))
+    );
+
     const result = await supabaseRequest(
       "contacts",
       "POST",
