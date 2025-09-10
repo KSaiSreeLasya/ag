@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -166,6 +167,23 @@ export default function ApplyForm({ open, onOpenChange, defaultPosition }: Apply
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="coverLetter">Cover Letter</Label>
               <Textarea id="coverLetter" rows={6} placeholder="Tell us why you\'re a great fit…" {...form.register("coverLetter")} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="resume">Upload Resume (PDF or DOCX)</Label>
+              <input
+                id="resume"
+                type="file"
+                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (f) {
+                    setResumeFile(f);
+                  } else {
+                    setResumeFile(null);
+                  }
+                }}
+                className="block w-full text-sm text-muted-foreground"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="expectedSalary">Expected Salary (optional)</Label>
