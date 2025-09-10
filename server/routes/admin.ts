@@ -270,4 +270,52 @@ router.get("/export/:table", async (req, res) => {
   }
 });
 
+// Export combined forms (quotes, contacts, applications, jobs, resources) as a single CSV with sections
+router.get("/export-forms", async (req, res) => {
+  try {
+    const tables = ["quotes", "contacts", "applications", "jobs", "resources"];
+    const parts: string[] = [];
+    for (const t of tables) {
+      let rows: any = [];
+      try {
+        rows = await supabaseRequest(t);
+      } catch (e: any) {
+        // include error note
+        parts.push(`# ${t.toUpperCase()} - ERROR: ${e?.message || String(e)}\n`);
+        continue;
+      }
+      if (!Array.isArray(rows)) {
+        parts.push(`# ${t.toUpperCase()} - Unexpected response\n`);
+        continue;
+      }
+      parts.push(`# ${t.toUpperCase()}\n`);
+      if (rows.length === 0) {
+        parts.push("(no rows)\n\n");
+        continue;
+      }
+      const columns = Object.keys(rows[0]);
+      const escape = (v: any) => {
+        if (v === null || v === undefined) return "";
+        const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+        if (s.includes(",") || s.includes("\n") || s.includes('"')) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      };
+      parts.push(columns.join(",") + "\n");
+      for (const r of rows) {
+        parts.push(columns.map((c) => escape(r[c])).join(",") + "\n");
+      }
+      parts.push("\n");
+    }
+
+    const csv = parts.join("");
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename=\"all_forms.csv\"`);
+    res.send(csv);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
