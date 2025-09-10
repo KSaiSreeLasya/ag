@@ -263,6 +263,82 @@ export default function Admin() {
                 </tr>
               </tbody>
             </table>
+
+            <div className="mt-6">
+              <h3 className="font-semibold mb-2">Manage Jobs</h3>
+              {jobsList.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No jobs found.</div>
+              ) : (
+                <div className="space-y-2">
+                  {jobsList.map((j) => (
+                    <div key={j.id} className="flex items-center justify-between border rounded p-2">
+                      <div>
+                        <div className="font-medium">{j.title || j.name || j.slug}</div>
+                        <div className="text-xs text-muted-foreground">{j.location || j.department || ''}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button onClick={async ()=>{
+                          const newTitle = prompt('Edit job title', j.title || j.name || j.slug || '');
+                          if (!newTitle) return;
+                          try{
+                            const res = await fetch(`/api/admin/jobs/${j.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'x-skip-auth': '1' }, body: JSON.stringify({ title: newTitle }) });
+                            if(!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+                            alert('Job updated');
+                            fetchJobsResources();
+                            fetchCounts();
+                          }catch(e){ console.error(e); alert('Update failed'); }
+                        }}>Edit</Button>
+                        <Button variant="destructive" onClick={async ()=>{
+                          if(!confirm('Delete job?')) return;
+                          try{
+                            const res = await fetch(`/api/admin/jobs/${j.id}`, { method: 'DELETE', headers: { 'x-skip-auth': '1' } });
+                            if(!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+                            alert('Deleted'); fetchJobsResources(); fetchCounts();
+                          }catch(e){ console.error(e); alert('Delete failed'); }
+                        }}>Delete</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <h3 className="font-semibold mt-6 mb-2">Manage Resources</h3>
+              {resourcesList.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No resources found.</div>
+              ) : (
+                <div className="space-y-2">
+                  {resourcesList.map((r) => (
+                    <div key={r.id} className="flex items-center justify-between border rounded p-2">
+                      <div>
+                        <div className="font-medium">{r.title}</div>
+                        <div className="text-xs text-muted-foreground">{r.url}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button onClick={async ()=>{
+                          const newTitle = prompt('Edit resource title', r.title || '');
+                          if (!newTitle) return;
+                          try{
+                            const res = await fetch(`/api/admin/resources/${r.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'x-skip-auth': '1' }, body: JSON.stringify({ title: newTitle }) });
+                            if(!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+                            alert('Resource updated');
+                            fetchJobsResources();
+                            fetchCounts();
+                          }catch(e){ console.error(e); alert('Update failed'); }
+                        }}>Edit</Button>
+                        <Button variant="destructive" onClick={async ()=>{
+                          if(!confirm('Delete resource?')) return;
+                          try{
+                            const res = await fetch(`/api/admin/resources/${r.id}`, { method: 'DELETE', headers: { 'x-skip-auth': '1' } });
+                            if(!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+                            alert('Deleted'); fetchJobsResources(); fetchCounts();
+                          }catch(e){ console.error(e); alert('Delete failed'); }
+                        }}>Delete</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {syncResult && (
