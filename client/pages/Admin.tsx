@@ -30,9 +30,15 @@ export default function Admin() {
     setSyncResult(null);
     try {
       const res = await fetch("/api/admin/sync-local", { method: "POST" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(JSON.stringify(json));
-      setSyncResult(JSON.stringify(json, null, 2));
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `status=${res.status}`);
+      let json: any = null;
+      try {
+        json = text ? JSON.parse(text) : null;
+      } catch (parseErr) {
+        // not JSON, keep text
+      }
+      setSyncResult(json ? JSON.stringify(json, null, 2) : text);
     } catch (e: any) {
       console.error("Sync failed", e);
       setSyncResult(`Sync failed: ${e?.message ?? String(e)}`);
