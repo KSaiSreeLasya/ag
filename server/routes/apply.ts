@@ -75,7 +75,9 @@ export const handleApply: RequestHandler = (req, res) => {
         // If only anon key is available (no service role / no SUPABASE_KEY), do NOT attempt to upload to Supabase storage.
         // Anonymous keys are not allowed to create buckets or bypass RLS for storage and will commonly return 403.
         if (!SUPABASE_KEY && SUPABASE_ANON_KEY) {
-          console.warn("Skipping resume upload: only anon key available; cannot upload to Supabase storage from server without service role key.");
+          console.warn(
+            "Skipping resume upload: only anon key available; cannot upload to Supabase storage from server without service role key.",
+          );
           // Still record filename and content type locally for debugging, but do not set a public URL.
           resume_filename = file.originalname;
           resume_content_type = file.mimetype;
@@ -264,7 +266,9 @@ export const handleApply: RequestHandler = (req, res) => {
 
         // Try to detect missing column error from PostgREST message
         // e.g. Could not find the 'resume_content_type' column of 'applications' in the schema cache
-        const m = (lastErrorText || "").match(/Could not find the '([^']+)' column/);
+        const m = (lastErrorText || "").match(
+          /Could not find the '([^']+)' column/,
+        );
         if (m && m[1]) {
           const missing = m[1];
           if (missing in insertPayload) {
@@ -279,7 +283,9 @@ export const handleApply: RequestHandler = (req, res) => {
         try {
           const parsed = JSON.parse(lastErrorText);
           if (parsed && parsed.message) {
-            const m2 = String(parsed.message).match(/Could not find the '([^']+)' column/);
+            const m2 = String(parsed.message).match(
+              /Could not find the '([^']+)' column/,
+            );
             if (m2 && m2[1] && m2[1] in insertPayload) {
               console.warn(`Removing missing column and retrying: ${m2[1]}`);
               delete insertPayload[m2[1]];
@@ -296,7 +302,9 @@ export const handleApply: RequestHandler = (req, res) => {
 
       return res
         .status(500)
-        .json({ error: `Insert failed after ${attempt} attempts: ${lastErrorText}` });
+        .json({
+          error: `Insert failed after ${attempt} attempts: ${lastErrorText}`,
+        });
     } catch (e: any) {
       return res.status(500).json({ error: e?.message || String(e) });
     }
