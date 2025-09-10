@@ -65,6 +65,10 @@ const App = () => (
             <Route path="/solutions/b2c" element={<B2C />} />
             <Route path="/solutions/b2g" element={<B2G />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/compliance" element={<Compliance />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
