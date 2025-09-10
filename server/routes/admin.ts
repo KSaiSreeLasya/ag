@@ -231,7 +231,12 @@ router.put("/jobs/:id", async (req, res) => {
 router.delete("/jobs/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    await supabaseRequest(ALLOWED_TABLES.jobs, "DELETE", undefined, `?id=eq.${encodeURIComponent(id)}`);
+    await supabaseRequest(
+      ALLOWED_TABLES.jobs,
+      "DELETE",
+      undefined,
+      `?id=eq.${encodeURIComponent(id)}`,
+    );
     res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -275,7 +280,12 @@ router.put("/resources/:id", async (req, res) => {
 router.delete("/resources/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    await supabaseRequest(ALLOWED_TABLES.resources, "DELETE", undefined, `?id=eq.${encodeURIComponent(id)}`);
+    await supabaseRequest(
+      ALLOWED_TABLES.resources,
+      "DELETE",
+      undefined,
+      `?id=eq.${encodeURIComponent(id)}`,
+    );
     res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -417,14 +427,28 @@ router.get("/export-xlsx", async (req, res) => {
   try {
     // Dynamically import exceljs and handle ESM default export
     const excelModule = await import("exceljs");
-    const ExcelJS = (excelModule && (excelModule.Workbook || excelModule.default?.Workbook)) ? excelModule : excelModule.default ? excelModule.default : excelModule;
-    const WorkbookCtor = ExcelJS.Workbook || (ExcelJS && ExcelJS.Workbook) || (excelModule && excelModule.default && excelModule.default.Workbook);
-    if (!WorkbookCtor) throw new Error("ExcelJS.Workbook constructor not found");
+    const ExcelJS =
+      excelModule && (excelModule.Workbook || excelModule.default?.Workbook)
+        ? excelModule
+        : excelModule.default
+          ? excelModule.default
+          : excelModule;
+    const WorkbookCtor =
+      ExcelJS.Workbook ||
+      (ExcelJS && ExcelJS.Workbook) ||
+      (excelModule && excelModule.default && excelModule.default.Workbook);
+    if (!WorkbookCtor)
+      throw new Error("ExcelJS.Workbook constructor not found");
     const workbook = new WorkbookCtor();
 
     // support query param tables=quotes,contacts,applications (comma separated)
     const q = String(req.query.tables || "").trim();
-    const tables = q ? q.split(",").map((s) => s.trim()).filter(Boolean) : ["quotes", "contacts", "applications"];
+    const tables = q
+      ? q
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : ["quotes", "contacts", "applications"];
 
     for (const t of tables) {
       let rows: any[] = [];
