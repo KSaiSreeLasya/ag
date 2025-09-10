@@ -3,8 +3,11 @@ import { Router } from "express";
 const router = Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-// Use explicit SUPABASE_KEY if provided, otherwise fall back to anon key for public routes
-const SUPABASE_KEY = process.env.SUPABASE_KEY ?? process.env.SUPABASE_ANON_KEY;
+// Prefer service role key on the server to bypass RLS for public submissions; fallback to explicit key or anon
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ??
+  process.env.SUPABASE_KEY ??
+  process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn(
