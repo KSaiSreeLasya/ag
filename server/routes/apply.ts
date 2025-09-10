@@ -205,37 +205,85 @@ export const handleApply: RequestHandler = (req, res) => {
         }
       }
 
-      const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/applications`;
       const headersObj = {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
         Prefer: "return=representation",
         "Content-Type": "application/json",
       } as Record<string, string>;
-      console.log("Supabase insert", {
-        url: insertUrl,
-        headers: headersObj,
-        payloadSample: JSON.stringify(insertPayload).slice(0, 200),
-      });
-      const insertResp = await fetch(insertUrl, {
-        method: "POST",
-        headers: headersObj,
-        body: JSON.stringify(insertPayload),
-      });
-      if (!insertResp.ok) {
-        const text = await insertResp.text().catch(() => "");
-        console.error("Insert into applications failed", {
-          status: insertResp.status,
-          body: text,
-          payload: insertPayload,
+
+      const tryInsert = async (table: string, payload: any) => {
+        const url = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${encodeURIComponent(table)}`;
+        console.log("Supabase insert attempt", { url, payloadSample: JSON.stringify(payload).slice(0, 200) });
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: headersObj,
+          body: JSON.stringify(payload),
         });
-        return res
-          .status(500)
-          .json({ error: `Insert failed: ${insertResp.status} ${text}` });
+        const text = await resp.text().catch(() => "");
+        if (!resp.ok) {
+          return { ok: false, status: resp.status, text };
+        }
+        let json = null;
+        try {
+          json = text ? JSON.parse(text) : null;
+        } catch {
+          json = text;
+        }
+        return { ok: true, rows: json };
+      };
+
+      // Attempt 1: insert into applications with resume fields
+      let result = await tryInsert("applications", insertPayload);
+      if (!result.ok) {
+        console.warn("Primary insert failed", result);
+        const bodyText = result.text || "";
+        // If failure due to missing resume columns or schema cache, remove resume_* and retry
+        if (/resume_content_type|resume_filename|resume_url|PGRST204|Could not find/.test(bodyText)) {
+          const payload2 = { ...insertPayload };
+          delete payload2.resume_content_type;
+          delete payload2.resume_filename;
+          delete payload2.resume_url;
+          console.log("Retrying insert without resume_* fields into applications");
+          result = await tryInsert("applications", payload2);
+        }
       }
-      const body = await insertResp.json().catch(() => null);
-      console.log("Application inserted", { rows: body });
-      return res.status(201).json({ ok: true, rows: body });
+
+      // Fallback: try job_applications (older table) if still failing
+      if (!result.ok) {
+        const payload3: any = {};
+        // map allowed for job_applications
+        const allowedJob = [
+          "position",
+          "full_name",
+          "email",
+          "phone",
+          "location",
+          "experience_years",
+          "linkedin",
+          "portfolio",
+          "cover_letter",
+          "expected_salary",
+          "notice_period",
+        ];
+        for (const k of Object.keys(insertPayload)) {
+          if (allowedJob.includes(k)) payload3[k] = insertPayload[k];
+        }
+        // if resume_url exists, put into portfolio
+        if (insertPayload.resume_url) {
+          payload3.portfolio = payload3.portfolio ? `${payload3.portfolio} | ${insertPayload.resume_url}` : insertPayload.resume_url;
+        }
+        console.log("Attempting fallback insert into job_applications", { payloadSample: JSON.stringify(payload3).slice(0,200) });
+        result = await tryInsert("job_applications", payload3);
+      }
+
+      if (!result.ok) {
+        console.error("All insert attempts failed", result);
+        return res.status(500).json({ error: `Insert failed after retries: ${result.status} ${result.text}` });
+      }
+
+      console.log("Application inserted", { rows: result.rows });
+      return res.status(201).json({ ok: true, rows: result.rows });
     } catch (e: any) {
       return res.status(500).json({ error: e?.message || String(e) });
     }
