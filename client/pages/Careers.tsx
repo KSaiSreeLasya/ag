@@ -49,158 +49,30 @@ export default function Careers() {
   const y = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Solar Engineer",
-      department: "Engineering",
-      location: "San Francisco, CA",
-      type: "Full-time",
-      experience: "5+ years",
-      salary: "$120k - $150k",
-      featured: true,
-      description:
-        "Lead the design and implementation of utility-scale solar projects, working with cutting-edge technology to drive renewable energy adoption.",
-      requirements: [
-        "Bachelor's degree in Electrical/Mechanical Engineering",
-        "5+ years experience in solar project development",
-        "PV system design and analysis expertise",
-        "Knowledge of grid interconnection standards",
-        "Experience with AutoCAD, PVsyst, or similar tools",
-      ],
-      benefits: [
-        "Health Insurance",
-        "401k Match",
-        "Flexible Hours",
-        "Remote Work",
-      ],
-    },
-    {
-      id: 2,
-      title: "Wind Energy Analyst",
-      department: "Analytics",
-      location: "Austin, TX",
-      type: "Full-time",
-      experience: "3+ years",
-      salary: "$90k - $120k",
-      featured: false,
-      description:
-        "Analyze wind patterns, energy production forecasts, and optimize wind farm performance using advanced data analytics and modeling techniques.",
-      requirements: [
-        "Master's degree in Engineering, Physics, or related field",
-        "Experience with wind resource assessment",
-        "Proficiency in MATLAB, Python, or R",
-        "Knowledge of meteorological data analysis",
-        "Wind turbine performance optimization experience",
-      ],
-      benefits: [
-        "Health Insurance",
-        "Stock Options",
-        "Learning Budget",
-        "Gym Membership",
-      ],
-    },
-    {
-      id: 3,
-      title: "Digital Solutions Developer",
-      department: "Technology",
-      location: "Remote",
-      type: "Full-time",
-      experience: "4+ years",
-      salary: "$110k - $140k",
-      featured: true,
-      description:
-        "Develop innovative digital platforms and IoT solutions for energy management, monitoring, and optimization systems.",
-      requirements: [
-        "Bachelor's degree in Computer Science or Software Engineering",
-        "Full-stack development experience (React, Node.js, Python)",
-        "IoT and cloud platform development",
-        "Database design and management skills",
-        "Experience with energy management systems",
-      ],
-      benefits: [
-        "Remote Work",
-        "Equipment Allowance",
-        "Health Insurance",
-        "Unlimited PTO",
-      ],
-    },
-    {
-      id: 4,
-      title: "Project Manager - Renewable Energy",
-      department: "Operations",
-      location: "Denver, CO",
-      type: "Full-time",
-      experience: "6+ years",
-      salary: "$100k - $130k",
-      featured: false,
-      description:
-        "Manage end-to-end renewable energy project delivery, coordinating with stakeholders, contractors, and regulatory bodies.",
-      requirements: [
-        "PMP certification preferred",
-        "6+ years project management experience",
-        "Renewable energy project experience",
-        "Strong stakeholder management skills",
-        "Knowledge of permitting and compliance processes",
-      ],
-      benefits: [
-        "Travel Opportunities",
-        "Professional Development",
-        "Health Insurance",
-        "Performance Bonus",
-      ],
-    },
-    {
-      id: 5,
-      title: "Business Development Specialist",
-      department: "Sales",
-      location: "New York, NY",
-      type: "Full-time",
-      experience: "3+ years",
-      salary: "$80k - $110k + Commission",
-      featured: false,
-      description:
-        "Drive business growth by identifying new opportunities, building client relationships, and developing strategic partnerships in the renewable energy sector.",
-      requirements: [
-        "Bachelor's degree in Business or Engineering",
-        "3+ years B2B sales experience",
-        "Renewable energy industry knowledge",
-        "Strong presentation and communication skills",
-        "CRM experience (Salesforce preferred)",
-      ],
-      benefits: [
-        "Commission Structure",
-        "Car Allowance",
-        "Health Insurance",
-        "Sales Incentives",
-      ],
-    },
-    {
-      id: 6,
-      title: "Sustainability Consultant",
-      department: "Consulting",
-      location: "Seattle, WA",
-      type: "Full-time",
-      experience: "4+ years",
-      salary: "$95k - $125k",
-      featured: true,
-      description:
-        "Provide strategic sustainability consulting to clients, developing renewable energy roadmaps and ESG compliance strategies.",
-      requirements: [
-        "Master's degree in Environmental Science or related field",
-        "Sustainability consulting experience",
-        "ESG reporting and compliance knowledge",
-        "Carbon footprint analysis expertise",
-        "Client management and presentation skills",
-      ],
-      benefits: [
-        "Professional Development",
-        "Conference Attendance",
-        "Health Insurance",
-        "Flexible Schedule",
-      ],
-    },
-  ];
+  const [jobs, setJobs] = useState<any[]>([]);
+
+  // Fetch live jobs from public API
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/jobs');
+        if (!res.ok) throw new Error('Failed to load jobs');
+        const data = await res.json();
+        if (mounted) setJobs(Array.isArray(data) ? data : []);
+      } catch (e) {
+        // fallback keep jobs empty
+        console.warn('Failed to fetch jobs', e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Provide a simple default when no jobs available
+  const defaultJobs = [];
+  const jobsToRender = jobs.length ? jobs : defaultJobs;
 
   const companyValues = [
     {
