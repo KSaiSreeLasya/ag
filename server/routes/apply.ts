@@ -229,25 +229,74 @@ export const handleApply: RequestHandler = (req, res) => {
         headers: headersObj,
         payloadSample: JSON.stringify(insertPayload).slice(0, 200),
       });
-      const insertResp = await fetch(insertUrl, {
-        method: "POST",
-        headers: headersObj,
-        body: JSON.stringify(insertPayload),
-      });
-      if (!insertResp.ok) {
+
+      // Attempt insert; if PostgREST complains about missing columns, remove them and retry a few times.
+      const maxRetries = 6;
+      let attempt = 0;
+      let lastErrorText = "";
+      let rows: any = null;
+
+      while (attempt < maxRetries) {
+        attempt++;
+        const insertResp = await fetch(insertUrl, {
+          method: "POST",
+          headers: headersObj,
+          body: JSON.stringify(insertPayload),
+        });
         const text = await insertResp.text().catch(() => "");
+        if (insertResp.ok) {
+          try {
+            rows = text ? JSON.parse(text) : null;
+          } catch (e) {
+            rows = null;
+          }
+          console.log("Application inserted", { rows });
+          return res.status(201).json({ ok: true, rows });
+        }
+
+        lastErrorText = text || `status=${insertResp.status}`;
         console.error("Insert into applications failed", {
+          attempt,
           status: insertResp.status,
-          body: text,
+          body: lastErrorText,
           payload: insertPayload,
         });
-        return res
-          .status(500)
-          .json({ error: `Insert failed: ${insertResp.status} ${text}` });
+
+        // Try to detect missing column error from PostgREST message
+        // e.g. Could not find the 'resume_content_type' column of 'applications' in the schema cache
+        const m = (lastErrorText || "").match(/Could not find the '([^']+)' column/);
+        if (m && m[1]) {
+          const missing = m[1];
+          if (missing in insertPayload) {
+            console.warn(`Removing missing column and retrying: ${missing}`);
+            delete insertPayload[missing];
+            // continue to retry
+            continue;
+          }
+        }
+
+        // Also try to parse JSON error with message field
+        try {
+          const parsed = JSON.parse(lastErrorText);
+          if (parsed && parsed.message) {
+            const m2 = String(parsed.message).match(/Could not find the '([^']+)' column/);
+            if (m2 && m2[1] && m2[1] in insertPayload) {
+              console.warn(`Removing missing column and retrying: ${m2[1]}`);
+              delete insertPayload[m2[1]];
+              continue;
+            }
+          }
+        } catch (e) {
+          // not JSON
+        }
+
+        // if we couldn't handle the error, break
+        break;
       }
-      const body = await insertResp.json().catch(() => null);
-      console.log("Application inserted", { rows: body });
-      return res.status(201).json({ ok: true, rows: body });
+
+      return res
+        .status(500)
+        .json({ error: `Insert failed after ${attempt} attempts: ${lastErrorText}` });
     } catch (e: any) {
       return res.status(500).json({ error: e?.message || String(e) });
     }
