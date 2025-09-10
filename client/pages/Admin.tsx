@@ -48,8 +48,28 @@ export default function Admin() {
     }
   };
 
+  const [jobsList, setJobsList] = React.useState<any[]>([]);
+  const [resourcesList, setResourcesList] = React.useState<any[]>([]);
+
+  const fetchJobsResources = async () => {
+    try {
+      const headers = { "x-skip-auth": "1" } as Record<string,string>;
+      const [jobsRes, resourcesRes] = await Promise.all([
+        fetch('/api/admin/jobs', { headers }),
+        fetch('/api/admin/resources', { headers }),
+      ]);
+      const jobs = jobsRes.ok ? await jobsRes.json().catch(()=>[]) : [];
+      const resources = resourcesRes.ok ? await resourcesRes.json().catch(()=>[]) : [];
+      setJobsList(Array.isArray(jobs)?jobs:[]);
+      setResourcesList(Array.isArray(resources)?resources:[]);
+    } catch (e) {
+      console.error('Failed to fetch jobs/resources', e);
+    }
+  };
+
   React.useEffect(() => {
     fetchCounts();
+    fetchJobsResources();
   }, []);
 
   const handleExport = async () => {
