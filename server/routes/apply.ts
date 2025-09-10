@@ -125,11 +125,9 @@ export const handleApply: RequestHandler = (req, res) => {
                   status: retryResp.status,
                   body: t2,
                 });
-                return res
-                  .status(500)
-                  .json({
-                    error: `Upload failed after bucket creation: ${retryResp.status} ${t2}`,
-                  });
+                return res.status(500).json({
+                  error: `Upload failed after bucket creation: ${retryResp.status} ${t2}`,
+                });
               }
             } else {
               const ct = await createResp.text().catch(() => "");
@@ -137,11 +135,9 @@ export const handleApply: RequestHandler = (req, res) => {
                 status: createResp.status,
                 body: ct,
               });
-              return res
-                .status(500)
-                .json({
-                  error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}`,
-                });
+              return res.status(500).json({
+                error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}`,
+              });
             }
           } catch (e2: any) {
             console.error("Bucket creation attempt failed", e2);
@@ -196,9 +192,13 @@ export const handleApply: RequestHandler = (req, res) => {
         // prefer explicit resume fields
         insertPayload.resume_url = resume_url;
         if (resume_filename) insertPayload.resume_filename = resume_filename;
-        if (resume_content_type) insertPayload.resume_content_type = resume_content_type;
+        if (resume_content_type)
+          insertPayload.resume_content_type = resume_content_type;
         // also set portfolio as fallback if provided empty
-        if (!insertPayload.portfolio || String(insertPayload.portfolio).trim() === "") {
+        if (
+          !insertPayload.portfolio ||
+          String(insertPayload.portfolio).trim() === ""
+        ) {
           // keep portfolio empty if not provided
         } else {
           insertPayload.portfolio = `${insertPayload.portfolio} | resume:${resume_url}`;

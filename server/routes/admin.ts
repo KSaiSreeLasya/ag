@@ -340,7 +340,14 @@ router.get("/export-xlsx", async (req, res) => {
   try {
     const ExcelJS = await import("exceljs");
     const workbook = new ExcelJS.Workbook();
-    const tables = ["quotes", "contacts", "applications", "job_applications", "jobs", "resources"];
+    const tables = [
+      "quotes",
+      "contacts",
+      "applications",
+      "job_applications",
+      "jobs",
+      "resources",
+    ];
     for (const t of tables) {
       let rows: any[] = [];
       try {
@@ -370,10 +377,7 @@ router.get("/export-xlsx", async (req, res) => {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=all_forms.xlsx`,
-    );
+    res.setHeader("Content-Disposition", `attachment; filename=all_forms.xlsx`);
     await workbook.xlsx.write(res);
     res.end();
   } catch (err: any) {
