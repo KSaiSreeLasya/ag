@@ -116,21 +116,34 @@ ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
 -- NOTE: If you prefer server-side insertion using the service role key, you can omit these policies and let the server insert.
 CREATE POLICY quotes_insert_public ON public.quotes
   FOR INSERT
-  USING (auth.role() = 'anon' OR auth.role() = 'authenticated')
-  WITH CHECK (true);
+  WITH CHECK (auth.role() = 'anon' OR auth.role() = 'authenticated');
 
 CREATE POLICY contacts_insert_public ON public.contacts
   FOR INSERT
-  USING (auth.role() = 'anon' OR auth.role() = 'authenticated')
-  WITH CHECK (true);
+  WITH CHECK (auth.role() = 'anon' OR auth.role() = 'authenticated');
 
 CREATE POLICY applications_insert_public ON public.applications
   FOR INSERT
-  USING (auth.role() = 'anon' OR auth.role() = 'authenticated')
-  WITH CHECK (true);
+  WITH CHECK (auth.role() = 'anon' OR auth.role() = 'authenticated');
 
 -- Jobs & resources: admin-only access (require entry in admin_users)
-CREATE POLICY jobs_admin_all ON public.jobs
+-- Jobs: separate policies per command to satisfy PostgreSQL RLS requirements
+CREATE POLICY jobs_select_admin ON public.jobs
+  FOR SELECT
+  USING (
+    auth.role() = 'authenticated' AND
+    EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
+  );
+
+CREATE POLICY jobs_insert_admin ON public.jobs
+  FOR INSERT
+  WITH CHECK (
+    auth.role() = 'authenticated' AND
+    EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
+  );
+
+CREATE POLICY jobs_update_admin ON public.jobs
+  FOR UPDATE
   USING (
     auth.role() = 'authenticated' AND
     EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
@@ -140,12 +153,42 @@ CREATE POLICY jobs_admin_all ON public.jobs
     EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
   );
 
-CREATE POLICY resources_admin_all ON public.resources
+CREATE POLICY jobs_delete_admin ON public.jobs
+  FOR DELETE
+  USING (
+    auth.role() = 'authenticated' AND
+    EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
+  );
+
+-- Resources: admin-only, separate policies
+CREATE POLICY resources_select_admin ON public.resources
+  FOR SELECT
+  USING (
+    auth.role() = 'authenticated' AND
+    EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
+  );
+
+CREATE POLICY resources_insert_admin ON public.resources
+  FOR INSERT
+  WITH CHECK (
+    auth.role() = 'authenticated' AND
+    EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
+  );
+
+CREATE POLICY resources_update_admin ON public.resources
+  FOR UPDATE
   USING (
     auth.role() = 'authenticated' AND
     EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
   )
   WITH CHECK (
+    auth.role() = 'authenticated' AND
+    EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
+  );
+
+CREATE POLICY resources_delete_admin ON public.resources
+  FOR DELETE
+  USING (
     auth.role() = 'authenticated' AND
     EXISTS (SELECT 1 FROM public.admin_users au WHERE au.user_id = auth.uid())
   );
