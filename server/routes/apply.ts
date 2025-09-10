@@ -163,14 +163,16 @@ export const handleApply: RequestHandler = (req, res) => {
       }
 
       const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/applications`;
+      const headersObj = {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: "return=representation",
+        "Content-Type": "application/json",
+      } as Record<string,string>;
+      console.log("Supabase insert", { url: insertUrl, headers: headersObj, payloadSample: JSON.stringify(insertPayload).slice(0,200) });
       const insertResp = await fetch(insertUrl, {
         method: "POST",
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          Prefer: "return=representation",
-          "Content-Type": "application/json",
-        },
+        headers: headersObj,
         body: JSON.stringify(insertPayload),
       });
       if (!insertResp.ok) {
