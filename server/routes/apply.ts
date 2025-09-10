@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import multer from "multer";
 import { z } from "zod";
 
 const applicationSchema = z.object({
