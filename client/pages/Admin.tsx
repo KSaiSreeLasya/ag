@@ -30,8 +30,29 @@ export default function Admin() {
     setSyncResult(null);
     try {
       const res = await fetch("/api/admin/sync-local", { method: "POST" });
-      // read via clone to avoid "body stream already read" if another consumer read it
-      const text = await res.clone().text();
+      // Safely attempt to read body; handle cases where body was already consumed.
+      let text = "";
+      try {
+        if ((res as any).bodyUsed) {
+          // body already used by another consumer (edge cases), provide fallback
+          text = "[body already consumed by another handler]";
+        } else {
+          // Try to read normally
+          try {
+            text = await res.text();
+          } catch (readErr) {
+            // If reading fails, attempt clone (may still fail)
+            try {
+              text = await res.clone().text();
+            } catch (cloneErr) {
+              text = `[unable to read response body: ${String(cloneErr)}]`;
+            }
+          }
+        }
+      } catch (e) {
+        text = `[unexpected read error: ${String(e)}]`;
+      }
+
       if (!res.ok) throw new Error(text || `status=${res.status}`);
       let json: any = null;
       try {
