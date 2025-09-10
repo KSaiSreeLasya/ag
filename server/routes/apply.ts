@@ -200,7 +200,7 @@ export const handleApply: RequestHandler = (req, res) => {
         }
       }
 
-      const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/job_applications`;
+      const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/applications`;
       const headersObj = {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
