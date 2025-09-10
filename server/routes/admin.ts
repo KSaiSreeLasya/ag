@@ -210,6 +210,34 @@ router.post("/jobs", async (req, res) => {
   }
 });
 
+// Update job
+router.put("/jobs/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const payload = req.body;
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.jobs,
+      "PATCH",
+      payload,
+      `?id=eq.${encodeURIComponent(id)}&return=representation`,
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete job
+router.delete("/jobs/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await supabaseRequest(ALLOWED_TABLES.jobs, "DELETE", undefined, `?id=eq.${encodeURIComponent(id)}`);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create resource
 router.post("/resources", async (req, res) => {
   try {
@@ -221,6 +249,34 @@ router.post("/resources", async (req, res) => {
       "?return=representation",
     );
     res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update resource
+router.put("/resources/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const payload = req.body;
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.resources,
+      "PATCH",
+      payload,
+      `?id=eq.${encodeURIComponent(id)}&return=representation`,
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete resource
+router.delete("/resources/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await supabaseRequest(ALLOWED_TABLES.resources, "DELETE", undefined, `?id=eq.${encodeURIComponent(id)}`);
+    res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
