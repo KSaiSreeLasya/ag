@@ -499,15 +499,29 @@ export default function Careers() {
                             Requirements
                           </h4>
                           <ul className="space-y-2">
-                            {job.requirements.map((req, reqIndex) => (
-                              <li
-                                key={reqIndex}
-                                className="flex items-start gap-2 text-muted-foreground"
-                              >
-                                <Star className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                                {req}
-                              </li>
-                            ))}
+                            {(() => {
+                              const reqs = Array.isArray(job.requirements)
+                                ? job.requirements
+                                : typeof job.requirements === 'string'
+                                ? (() => {
+                                    try {
+                                      const parsed = JSON.parse(job.requirements);
+                                      return Array.isArray(parsed) ? parsed : [];
+                                    } catch (e) {
+                                      return [];
+                                    }
+                                  })()
+                                : [];
+                              return reqs.map((req: any, reqIndex: number) => (
+                                <li
+                                  key={reqIndex}
+                                  className="flex items-start gap-2 text-muted-foreground"
+                                >
+                                  <Star className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                                  {req}
+                                </li>
+                              ));
+                            })()}
                           </ul>
                         </div>
 
