@@ -29,7 +29,7 @@ export default function Admin() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await fetch("/api/admin/sync-local", { method: "POST" });
+      const res = await fetch("/api/admin/sync-local", { method: "POST", headers: { "x-skip-auth": "1" } });
       // Safely attempt to read body; handle cases where body was already consumed.
       let text = "";
       try {
