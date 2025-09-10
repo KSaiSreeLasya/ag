@@ -86,9 +86,47 @@ export const handleApply: RequestHandler = (req, res) => {
         if (!resp.ok) {
           const text = await resp.text().catch(() => "");
           console.error("Resume upload failed", { status: resp.status, body: text, path, bucket: 'resumes' });
-          return res
-            .status(500)
-            .json({ error: `Upload failed: ${resp.status} ${text}` });
+          // Try to create the bucket if missing (best-effort)
+          try {
+            const bucketUrl = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/bucket`;
+            const createResp = await fetch(bucketUrl, {
+              method: "POST",
+              headers: {
+                apikey: SUPABASE_KEY,
+                Authorization: `Bearer ${SUPABASE_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ name: "resumes", public: true }),
+            });
+            if (createResp.ok) {
+              console.log("Created resumes bucket; retrying upload");
+              const retryResp = await fetch(url, {
+                method: "PUT",
+                headers: {
+                  apikey: SUPABASE_KEY,
+                  Authorization: `Bearer ${SUPABASE_KEY}`,
+                  "Content-Type": file.mimetype || "application/octet-stream",
+                },
+                body: file.buffer,
+              });
+              if (retryResp.ok) {
+                resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
+                resume_filename = file.originalname;
+                resume_content_type = file.mimetype;
+              } else {
+                const t2 = await retryResp.text().catch(() => "");
+                console.error("Retry upload failed", { status: retryResp.status, body: t2 });
+                return res.status(500).json({ error: `Upload failed after bucket creation: ${retryResp.status} ${t2}` });
+              }
+            } else {
+              const ct = await createResp.text().catch(() => "");
+              console.error("Failed to create bucket", { status: createResp.status, body: ct });
+              return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}` });
+            }
+          } catch (e2: any) {
+            console.error("Bucket creation attempt failed", e2);
+            return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}` });
+          }
         }
         resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
         resume_filename = file.originalname;
