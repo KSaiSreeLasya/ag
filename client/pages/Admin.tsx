@@ -5,6 +5,53 @@ export default function Admin() {
   const [syncing, setSyncing] = React.useState(false);
   const [syncResult, setSyncResult] = React.useState<string | null>(null);
 
+  // analytics
+  const [counts, setCounts] = React.useState({
+    quotes: 0,
+    contacts: 0,
+    applications: 0,
+    jobs: 0,
+    resources: 0,
+  });
+
+  const [addingJob, setAddingJob] = React.useState(false);
+  const [addingResource, setAddingResource] = React.useState(false);
+  const [jobForm, setJobForm] = React.useState({ title: "", slug: "", description: "" });
+  const [resourceForm, setResourceForm] = React.useState({ title: "", url: "", description: "" });
+
+  const fetchCounts = async () => {
+    try {
+      const headers = { "x-skip-auth": "1" } as Record<string,string>;
+      const [quotesRes, contactsRes, appsRes, jobsRes, resourcesRes] = await Promise.all([
+        fetch("/api/admin/quotes", { headers }),
+        fetch("/api/admin/contacts", { headers }),
+        fetch("/api/admin/applications", { headers }),
+        fetch("/api/admin/jobs", { headers }),
+        fetch("/api/admin/resources", { headers }),
+      ]);
+      const [quotes, contacts, apps, jobs, resources] = await Promise.all([
+        quotesRes.ok ? quotesRes.json().catch(() => []) : [],
+        contactsRes.ok ? contactsRes.json().catch(() => []) : [],
+        appsRes.ok ? appsRes.json().catch(() => []) : [],
+        jobsRes.ok ? jobsRes.json().catch(() => []) : [],
+        resourcesRes.ok ? resourcesRes.json().catch(() => []) : [],
+      ]);
+      setCounts({
+        quotes: Array.isArray(quotes) ? quotes.length : 0,
+        contacts: Array.isArray(contacts) ? contacts.length : 0,
+        applications: Array.isArray(apps) ? apps.length : 0,
+        jobs: Array.isArray(jobs) ? jobs.length : 0,
+        resources: Array.isArray(resources) ? resources.length : 0,
+      });
+    } catch (e) {
+      console.error("Failed to fetch counts", e);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCounts();
+  }, []);
+
   const handleExport = async () => {
     try {
       const res = await fetch("/api/admin/export-xlsx", {
