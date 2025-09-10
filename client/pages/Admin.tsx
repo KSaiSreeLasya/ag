@@ -2,6 +2,9 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 export default function Admin() {
+  const [syncing, setSyncing] = React.useState(false);
+  const [syncResult, setSyncResult] = React.useState<string | null>(null);
+
   const handleExport = async () => {
     try {
       const res = await fetch("/api/admin/export-forms");
@@ -10,7 +13,7 @@ export default function Admin() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "all_forms.xlsx";
+      a.download = "all_forms.csv";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -19,6 +22,22 @@ export default function Admin() {
       // eslint-disable-next-line no-console
       console.error(e);
       alert("Export failed. Check server logs.");
+    }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/admin/sync-local", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(json));
+      setSyncResult(JSON.stringify(json, null, 2));
+    } catch (e: any) {
+      console.error("Sync failed", e);
+      setSyncResult(`Sync failed: ${e?.message ?? String(e)}`);
+    } finally {
+      setSyncing(false);
     }
   };
 
