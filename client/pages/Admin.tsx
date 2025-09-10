@@ -173,8 +173,58 @@ export default function Admin() {
             <div className="flex items-center gap-2">
               <Button onClick={handleExport} className="bg-blue-600">Export (XLSX)</Button>
               <Button onClick={handleSync} variant="outline">Sync local</Button>
+              <Button onClick={() => setAddingJob((v) => !v)} variant="outline">{addingJob ? 'Close' : 'Add Job'}</Button>
+              <Button onClick={() => setAddingResource((v) => !v)} variant="outline">{addingResource ? 'Close' : 'Add Resource'}</Button>
             </div>
           </div>
+
+          {addingJob && (
+            <div className="mb-4 border p-4 rounded">
+              <h3 className="font-semibold mb-2">Create Job</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                <input placeholder="Title" value={jobForm.title} onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })} className="px-3 py-2 border rounded col-span-2" />
+                <input placeholder="Slug" value={jobForm.slug} onChange={(e) => setJobForm({ ...jobForm, slug: e.target.value })} className="px-3 py-2 border rounded" />
+              </div>
+              <textarea placeholder="Description" value={jobForm.description} onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })} className="w-full p-3 border rounded mb-2" />
+              <div className="flex gap-2">
+                <Button onClick={async () => {
+                  try {
+                    const res = await fetch('/api/admin/jobs', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-skip-auth': '1' }, body: JSON.stringify({ title: jobForm.title, slug: jobForm.slug, description: jobForm.description, is_published: true }) });
+                    if (!res.ok) throw new Error(await res.text().catch(() => res.statusText));
+                    alert('Job created');
+                    setJobForm({ title: '', slug: '', description: '' });
+                    setAddingJob(false);
+                    fetchCounts();
+                  } catch (e) { console.error(e); alert('Failed to create job'); }
+                }}>Create Job</Button>
+                <Button variant="outline" onClick={() => setAddingJob(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
+          {addingResource && (
+            <div className="mb-4 border p-4 rounded">
+              <h3 className="font-semibold mb-2">Create Resource</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                <input placeholder="Title" value={resourceForm.title} onChange={(e) => setResourceForm({ ...resourceForm, title: e.target.value })} className="px-3 py-2 border rounded col-span-2" />
+                <input placeholder="URL" value={resourceForm.url} onChange={(e) => setResourceForm({ ...resourceForm, url: e.target.value })} className="px-3 py-2 border rounded" />
+              </div>
+              <textarea placeholder="Description" value={resourceForm.description} onChange={(e) => setResourceForm({ ...resourceForm, description: e.target.value })} className="w-full p-3 border rounded mb-2" />
+              <div className="flex gap-2">
+                <Button onClick={async () => {
+                  try {
+                    const res = await fetch('/api/admin/resources', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-skip-auth': '1' }, body: JSON.stringify({ title: resourceForm.title, url: resourceForm.url, description: resourceForm.description, is_published: true }) });
+                    if (!res.ok) throw new Error(await res.text().catch(() => res.statusText));
+                    alert('Resource created');
+                    setResourceForm({ title: '', url: '', description: '' });
+                    setAddingResource(false);
+                    fetchCounts();
+                  } catch (e) { console.error(e); alert('Failed to create resource'); }
+                }}>Create Resource</Button>
+                <Button variant="outline" onClick={() => setAddingResource(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4">
             <table className="min-w-full table-fixed text-sm">
