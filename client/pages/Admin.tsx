@@ -7,7 +7,7 @@ export default function Admin() {
 
   const handleExport = async () => {
     try {
-      const res = await fetch("/api/admin/export-forms", {
+      const res = await fetch("/api/admin/export-xlsx", {
         headers: { "x-skip-auth": "1" },
       });
       if (!res.ok) throw new Error("Export failed");
@@ -15,7 +15,7 @@ export default function Admin() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "all_forms.csv";
+      a.download = "all_forms.xlsx";
       document.body.appendChild(a);
       a.click();
       a.remove();
