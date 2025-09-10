@@ -10,7 +10,12 @@ export default function Admin() {
       const res = await fetch("/api/admin/export-xlsx", {
         headers: { "x-skip-auth": "1" },
       });
-      if (!res.ok) throw new Error("Export failed");
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Export failed response:", res.status, text);
+        alert(`Export failed: ${res.status} ${text}`);
+        return;
+      }
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
