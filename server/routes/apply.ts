@@ -72,7 +72,8 @@ export const handleApply: RequestHandler = (req, res) => {
         // sanitize filename and create path
         const timestamp = Date.now();
         const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const path = `resumes/${timestamp}_${safeName}`;
+        // store object path inside bucket; avoid duplicating bucket name in path
+        const path = `${timestamp}_${safeName}`;
         const url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
         const resp = await fetch(url, {
           method: "PUT",
