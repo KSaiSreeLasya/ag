@@ -338,8 +338,12 @@ router.get("/export-forms", async (req, res) => {
 // Multi-sheet XLSX export (each table in its own sheet)
 router.get("/export-xlsx", async (req, res) => {
   try {
-    const ExcelJS = await import("exceljs");
-    const workbook = new ExcelJS.Workbook();
+    // Dynamically import exceljs and handle ESM default export
+    const excelModule = await import("exceljs");
+    const ExcelJS = (excelModule && (excelModule.Workbook || excelModule.default?.Workbook)) ? excelModule : excelModule.default ? excelModule.default : excelModule;
+    const WorkbookCtor = ExcelJS.Workbook || (ExcelJS && ExcelJS.Workbook) || (excelModule && excelModule.default && excelModule.default.Workbook);
+    if (!WorkbookCtor) throw new Error("ExcelJS.Workbook constructor not found");
+    const workbook = new WorkbookCtor();
     const tables = [
       "quotes",
       "contacts",
