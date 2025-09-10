@@ -42,7 +42,7 @@ interface ApplyFormProps {
 
 export default function ApplyForm({ open, onOpenChange, defaultPosition }: ApplyFormProps) {
   const { toast } = useToast();
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
 
   const form = useForm<ApplicationInput>({
     resolver: zodResolver(applicationSchema),
