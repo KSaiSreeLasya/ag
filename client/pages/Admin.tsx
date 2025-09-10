@@ -30,7 +30,8 @@ export default function Admin() {
     setSyncResult(null);
     try {
       const res = await fetch("/api/admin/sync-local", { method: "POST" });
-      const text = await res.text();
+      // read via clone to avoid "body stream already read" if another consumer read it
+      const text = await res.clone().text();
       if (!res.ok) throw new Error(text || `status=${res.status}`);
       let json: any = null;
       try {
