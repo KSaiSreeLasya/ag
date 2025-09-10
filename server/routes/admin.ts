@@ -162,6 +162,26 @@ router.get("/resources", async (req, res) => {
   }
 });
 
+// Applications list: prefer public.applications, fallback to job_applications
+router.get("/applications", async (req, res) => {
+  try {
+    let rows: any;
+    try {
+      rows = await supabaseRequest(ALLOWED_TABLES.applications);
+    } catch (e) {
+      // fallback: try job_applications
+      try {
+        rows = await supabaseRequest("job_applications");
+      } catch (e2) {
+        throw e; // rethrow original
+      }
+    }
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Trigger sync of local pending entries to Supabase (uses service role key)
 router.post("/sync-local", async (req, res) => {
   try {
