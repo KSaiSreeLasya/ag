@@ -214,7 +214,10 @@ export const handleApply: RequestHandler = (req, res) => {
 
       const tryInsert = async (table: string, payload: any) => {
         const url = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/${encodeURIComponent(table)}`;
-        console.log("Supabase insert attempt", { url, payloadSample: JSON.stringify(payload).slice(0, 200) });
+        console.log("Supabase insert attempt", {
+          url,
+          payloadSample: JSON.stringify(payload).slice(0, 200),
+        });
         const resp = await fetch(url, {
           method: "POST",
           headers: headersObj,
@@ -239,12 +242,18 @@ export const handleApply: RequestHandler = (req, res) => {
         console.warn("Primary insert failed", result);
         const bodyText = result.text || "";
         // If failure due to missing resume columns or schema cache, remove resume_* and retry
-        if (/resume_content_type|resume_filename|resume_url|PGRST204|Could not find/.test(bodyText)) {
+        if (
+          /resume_content_type|resume_filename|resume_url|PGRST204|Could not find/.test(
+            bodyText,
+          )
+        ) {
           const payload2 = { ...insertPayload };
           delete payload2.resume_content_type;
           delete payload2.resume_filename;
           delete payload2.resume_url;
-          console.log("Retrying insert without resume_* fields into applications");
+          console.log(
+            "Retrying insert without resume_* fields into applications",
+          );
           result = await tryInsert("applications", payload2);
         }
       }
@@ -271,15 +280,23 @@ export const handleApply: RequestHandler = (req, res) => {
         }
         // if resume_url exists, put into portfolio
         if (insertPayload.resume_url) {
-          payload3.portfolio = payload3.portfolio ? `${payload3.portfolio} | ${insertPayload.resume_url}` : insertPayload.resume_url;
+          payload3.portfolio = payload3.portfolio
+            ? `${payload3.portfolio} | ${insertPayload.resume_url}`
+            : insertPayload.resume_url;
         }
-        console.log("Attempting fallback insert into job_applications", { payloadSample: JSON.stringify(payload3).slice(0,200) });
+        console.log("Attempting fallback insert into job_applications", {
+          payloadSample: JSON.stringify(payload3).slice(0, 200),
+        });
         result = await tryInsert("job_applications", payload3);
       }
 
       if (!result.ok) {
         console.error("All insert attempts failed", result);
-        return res.status(500).json({ error: `Insert failed after retries: ${result.status} ${result.text}` });
+        return res
+          .status(500)
+          .json({
+            error: `Insert failed after retries: ${result.status} ${result.text}`,
+          });
       }
 
       console.log("Application inserted", { rows: result.rows });
