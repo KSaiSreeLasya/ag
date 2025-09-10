@@ -62,9 +62,11 @@ export const handleApply: RequestHandler = (req, res) => {
       const SUPABASE_URL = process.env.SUPABASE_URL;
       const SUPABASE_KEY =
         process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
+      const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
       if (file) {
-        if (!SUPABASE_URL || !SUPABASE_KEY) {
+        const uploadKey = SUPABASE_KEY ?? SUPABASE_ANON_KEY;
+        if (!SUPABASE_URL || !uploadKey) {
           return res
             .status(500)
             .json({ error: "Supabase not configured for file uploads" });
@@ -78,8 +80,8 @@ export const handleApply: RequestHandler = (req, res) => {
         const resp = await fetch(url, {
           method: "PUT",
           headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
+            apikey: uploadKey,
+            Authorization: `Bearer ${uploadKey}`,
             "Content-Type": file.mimetype || "application/octet-stream",
           },
           body: file.buffer,
@@ -98,8 +100,8 @@ export const handleApply: RequestHandler = (req, res) => {
             const createResp = await fetch(bucketUrl, {
               method: "POST",
               headers: {
-                apikey: SUPABASE_KEY,
-                Authorization: `Bearer ${SUPABASE_KEY}`,
+                apikey: uploadKey,
+                Authorization: `Bearer ${uploadKey}`,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({ name: "resumes", public: true }),
@@ -109,8 +111,8 @@ export const handleApply: RequestHandler = (req, res) => {
               const retryResp = await fetch(url, {
                 method: "PUT",
                 headers: {
-                  apikey: SUPABASE_KEY,
-                  Authorization: `Bearer ${SUPABASE_KEY}`,
+                  apikey: uploadKey,
+                  Authorization: `Bearer ${uploadKey}`,
                   "Content-Type": file.mimetype || "application/octet-stream",
                 },
                 body: file.buffer,
