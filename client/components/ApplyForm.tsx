@@ -67,7 +67,7 @@ export default function ApplyForm({ open, onOpenChange, defaultPosition }: Apply
     form.setValue("position", defaultPosition);
   }
 
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = React.useState<File | null>(null);
 
   const onSubmit = async (values: ApplicationInput) => {
     setSubmitting(true);
