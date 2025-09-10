@@ -128,11 +128,13 @@ export const handleApply: RequestHandler = (req, res) => {
       });
       if (!insertResp.ok) {
         const text = await insertResp.text().catch(() => "");
+        console.error("Insert into applications failed", { status: insertResp.status, body: text, payload: insertPayload });
         return res
           .status(500)
           .json({ error: `Insert failed: ${insertResp.status} ${text}` });
       }
       const body = await insertResp.json().catch(() => null);
+      console.log("Application inserted", { rows: body });
       return res.status(201).json({ ok: true, rows: body });
     } catch (e: any) {
       return res.status(500).json({ error: e?.message || String(e) });
