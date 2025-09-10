@@ -49,13 +49,22 @@ export default function Admin() {
           Analytics and form exports.
         </p>
         <div className="space-y-4">
-          <Button onClick={handleExport}>Export all forms (XLSX)</Button>
+          <div className="flex gap-2">
+            <Button onClick={handleExport}>Export all forms (CSV)</Button>
+            <Button onClick={handleSync} disabled={syncing} variant="outline">
+              {syncing ? "Syncing..." : "Sync local to Supabase"}
+            </Button>
+          </div>
+
           <div className="border rounded p-4">
             <h2 className="font-semibold mb-2">Form submissions (preview)</h2>
             <p className="text-sm text-muted-foreground">
               No data yet — connect Supabase and implement server export
               endpoints to populate this area.
             </p>
+            {syncResult && (
+              <pre className="mt-4 text-xs bg-gray-900 text-white p-2 rounded">{syncResult}</pre>
+            )}
           </div>
         </div>
       </div>
