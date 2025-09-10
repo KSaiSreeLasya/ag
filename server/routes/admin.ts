@@ -73,6 +73,12 @@ const ALLOWED_TABLES = {
 // Middleware: require admin user via Supabase auth
 router.use(async (req, res, next) => {
   try {
+    // Development bypass: allow skipping auth when running in dev and header present
+    if (process.env.NODE_ENV !== "production" && (req.headers["x-skip-auth"] === "1" || req.headers["x-skip-auth"] === "true")) {
+      (req as any).supabaseUser = { email: process.env.DEV_ADMIN_EMAIL ?? "dev@localhost" };
+      return next();
+    }
+
     const auth = req.headers.authorization as string | undefined;
     if (!auth)
       return res.status(401).json({ error: "Missing Authorization header" });
