@@ -166,20 +166,37 @@ export const handleApply: RequestHandler = (req, res) => {
         });
       }
 
-      // Map camelCase frontend keys to snake_case DB columns
+      // Map camelCase frontend keys to snake_case DB columns and target existing job_applications table
       const mapKey = (k: string) => k.replace(/([A-Z])/g, "_$1").toLowerCase();
+      // whitelist columns present in job_applications migration
+      const allowed = new Set([
+        "position",
+        "full_name",
+        "email",
+        "phone",
+        "location",
+        "experience_years",
+        "linkedin",
+        "portfolio",
+        "cover_letter",
+        "expected_salary",
+        "notice_period",
+      ]);
       const insertPayload: any = {};
       for (const [k, v] of Object.entries(parse.data)) {
         const mapped = mapKey(k);
-        insertPayload[mapped] = v;
+        if (allowed.has(mapped)) insertPayload[mapped] = v;
       }
+      // If resume uploaded, store its public URL in portfolio field (fallback) to avoid missing columns
       if (resume_url) {
-        insertPayload.resume_url = resume_url;
-        insertPayload.resume_filename = resume_filename;
-        insertPayload.resume_content_type = resume_content_type;
+        if (!insertPayload.portfolio || String(insertPayload.portfolio).trim() === "") {
+          insertPayload.portfolio = resume_url;
+        } else {
+          insertPayload.portfolio = `${insertPayload.portfolio} | resume:${resume_url}`;
+        }
       }
 
-      const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/applications`;
+      const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/job_applications`;
       const headersObj = {
         apikey: SUPABASE_KEY,
         Authorization: `Bearer ${SUPABASE_KEY}`,
