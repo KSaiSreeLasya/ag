@@ -85,6 +85,7 @@ export const handleApply: RequestHandler = (req, res) => {
         });
         if (!resp.ok) {
           const text = await resp.text().catch(() => "");
+          console.error("Resume upload failed", { status: resp.status, body: text, path, bucket: 'resumes' });
           return res
             .status(500)
             .json({ error: `Upload failed: ${resp.status} ${text}` });
