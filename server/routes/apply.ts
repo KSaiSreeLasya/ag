@@ -166,10 +166,11 @@ export const handleApply: RequestHandler = (req, res) => {
         });
       }
 
-      // Map camelCase frontend keys to snake_case DB columns and target existing job_applications table
+      // Map camelCase frontend keys to snake_case DB columns and target public.applications table
       const mapKey = (k: string) => k.replace(/([A-Z])/g, "_$1").toLowerCase();
-      // whitelist columns present in job_applications migration
+      // whitelist columns present in public.applications (migration added)
       const allowed = new Set([
+        "job_id",
         "position",
         "full_name",
         "email",
@@ -178,6 +179,9 @@ export const handleApply: RequestHandler = (req, res) => {
         "experience_years",
         "linkedin",
         "portfolio",
+        "resume_url",
+        "resume_filename",
+        "resume_content_type",
         "cover_letter",
         "expected_salary",
         "notice_period",
