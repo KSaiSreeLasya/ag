@@ -71,86 +71,96 @@ export const handleApply: RequestHandler = (req, res) => {
             .status(500)
             .json({ error: "Supabase not configured for file uploads" });
         }
-        // sanitize filename and create path
-        const timestamp = Date.now();
-        const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
-        // store object path inside bucket; avoid duplicating bucket name in path
-        const path = `${timestamp}_${safeName}`;
-        const url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
-        const resp = await fetch(url, {
-          method: "PUT",
-          headers: {
-            apikey: uploadKey,
-            Authorization: `Bearer ${uploadKey}`,
-            "Content-Type": file.mimetype || "application/octet-stream",
-          },
-          body: file.buffer,
-        });
-        if (!resp.ok) {
-          const text = await resp.text().catch(() => "");
-          console.error("Resume upload failed", {
-            status: resp.status,
-            body: text,
-            path,
-            bucket: "resumes",
+
+        // If only anon key is available (no service role / no SUPABASE_KEY), do NOT attempt to upload to Supabase storage.
+        // Anonymous keys are not allowed to create buckets or bypass RLS for storage and will commonly return 403.
+        if (!SUPABASE_KEY && SUPABASE_ANON_KEY) {
+          console.warn("Skipping resume upload: only anon key available; cannot upload to Supabase storage from server without service role key.");
+          // Still record filename and content type locally for debugging, but do not set a public URL.
+          resume_filename = file.originalname;
+          resume_content_type = file.mimetype;
+        } else {
+          // sanitize filename and create path
+          const timestamp = Date.now();
+          const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+          // store object path inside bucket; avoid duplicating bucket name in path
+          const path = `${timestamp}_${safeName}`;
+          const url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
+          const resp = await fetch(url, {
+            method: "PUT",
+            headers: {
+              apikey: uploadKey,
+              Authorization: `Bearer ${uploadKey}`,
+              "Content-Type": file.mimetype || "application/octet-stream",
+            },
+            body: file.buffer,
           });
-          // Try to create the bucket if missing (best-effort)
-          try {
-            const bucketUrl = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/bucket`;
-            const createResp = await fetch(bucketUrl, {
-              method: "POST",
-              headers: {
-                apikey: uploadKey,
-                Authorization: `Bearer ${uploadKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ name: "resumes", public: true }),
+          if (!resp.ok) {
+            const text = await resp.text().catch(() => "");
+            console.error("Resume upload failed", {
+              status: resp.status,
+              body: text,
+              path,
+              bucket: "resumes",
             });
-            if (createResp.ok) {
-              console.log("Created resumes bucket; retrying upload");
-              const retryResp = await fetch(url, {
-                method: "PUT",
+            // Try to create the bucket if missing (best-effort)
+            try {
+              const bucketUrl = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/bucket`;
+              const createResp = await fetch(bucketUrl, {
+                method: "POST",
                 headers: {
                   apikey: uploadKey,
                   Authorization: `Bearer ${uploadKey}`,
-                  "Content-Type": file.mimetype || "application/octet-stream",
+                  "Content-Type": "application/json",
                 },
-                body: file.buffer,
+                body: JSON.stringify({ name: "resumes", public: true }),
               });
-              if (retryResp.ok) {
-                resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
-                resume_filename = file.originalname;
-                resume_content_type = file.mimetype;
+              if (createResp.ok) {
+                console.log("Created resumes bucket; retrying upload");
+                const retryResp = await fetch(url, {
+                  method: "PUT",
+                  headers: {
+                    apikey: uploadKey,
+                    Authorization: `Bearer ${uploadKey}`,
+                    "Content-Type": file.mimetype || "application/octet-stream",
+                  },
+                  body: file.buffer,
+                });
+                if (retryResp.ok) {
+                  resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
+                  resume_filename = file.originalname;
+                  resume_content_type = file.mimetype;
+                } else {
+                  const t2 = await retryResp.text().catch(() => "");
+                  console.error("Retry upload failed", {
+                    status: retryResp.status,
+                    body: t2,
+                  });
+                  return res.status(500).json({
+                    error: `Upload failed after bucket creation: ${retryResp.status} ${t2}`,
+                  });
+                }
               } else {
-                const t2 = await retryResp.text().catch(() => "");
-                console.error("Retry upload failed", {
-                  status: retryResp.status,
-                  body: t2,
+                const ct = await createResp.text().catch(() => "");
+                console.error("Failed to create bucket", {
+                  status: createResp.status,
+                  body: ct,
                 });
                 return res.status(500).json({
-                  error: `Upload failed after bucket creation: ${retryResp.status} ${t2}`,
+                  error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}`,
                 });
               }
-            } else {
-              const ct = await createResp.text().catch(() => "");
-              console.error("Failed to create bucket", {
-                status: createResp.status,
-                body: ct,
-              });
-              return res.status(500).json({
-                error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}`,
-              });
+            } catch (e2: any) {
+              console.error("Bucket creation attempt failed", e2);
+              return res
+                .status(500)
+                .json({ error: `Upload failed: ${resp.status} ${text}` });
             }
-          } catch (e2: any) {
-            console.error("Bucket creation attempt failed", e2);
-            return res
-              .status(500)
-              .json({ error: `Upload failed: ${resp.status} ${text}` });
           }
+          resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
+          resume_filename = file.originalname;
+          resume_content_type = file.mimetype;
         }
-        resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
-        resume_filename = file.originalname;
-        resume_content_type = file.mimetype;
       }
 
       // Insert application row into Supabase using service role key (bypass RLS)
