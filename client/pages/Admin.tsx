@@ -80,32 +80,77 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-        <p className="text-muted-foreground mb-6">
-          Analytics and form exports.
-        </p>
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Button onClick={handleExport}>Export all forms (XLSX)</Button>
+    <div className="min-h-screen bg-background px-8 py-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Manage job applications, contact inquiries, and resume downloads</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button onClick={handleExport} className="bg-green-600">Export all forms (XLSX)</Button>
             <Button onClick={handleSync} disabled={syncing} variant="outline">
               {syncing ? "Syncing..." : "Sync local to Supabase"}
             </Button>
           </div>
+        </div>
 
-          <div className="border rounded p-4">
-            <h2 className="font-semibold mb-2">Form submissions (preview)</h2>
-            <p className="text-sm text-muted-foreground">
-              No data yet — connect Supabase and implement server export
-              endpoints to populate this area.
-            </p>
-            {syncResult && (
-              <pre className="mt-4 text-xs bg-gray-900 text-white p-2 rounded">
-                {syncResult}
-              </pre>
-            )}
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          {[
+            { title: "Total Applications", value: 0 },
+            { title: "Pending Review", value: 0 },
+            { title: "Contact Messages", value: 0 },
+            { title: "Resume Uploads", value: 0 },
+            { title: "Newsletter Subscribers", value: 0 },
+            { title: "Active Job Postings", value: 0 },
+          ].map((card, idx) => (
+            <div key={idx} className="bg-white/80 p-4 rounded shadow flex flex-col">
+              <span className="text-sm text-muted-foreground">{card.title}</span>
+              <span className="text-2xl font-semibold mt-2">{card.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabs & Filters */}
+        <div className="bg-white/80 p-6 rounded shadow">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <input placeholder="Search by name, email, position..." className="px-4 py-2 border rounded w-96" />
+              <select className="px-3 py-2 border rounded">
+                <option>All Status</option>
+                <option>Pending</option>
+                <option>Reviewed</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleExport} className="bg-blue-600">Export (XLSX)</Button>
+              <Button onClick={handleSync} variant="outline">Sync local</Button>
+            </div>
           </div>
+
+          <div className="mt-4">
+            <table className="min-w-full table-fixed text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b">
+                  <th className="py-2 px-3 w-1/4">Applicant</th>
+                  <th className="py-2 px-3 w-1/4">Position</th>
+                  <th className="py-2 px-3 w-1/6">Experience</th>
+                  <th className="py-2 px-3 w-1/6">Status</th>
+                  <th className="py-2 px-3 w-1/6">Applied</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-muted-foreground">No applications found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {syncResult && (
+            <pre className="mt-4 text-xs bg-gray-900 text-white p-2 rounded">{syncResult}</pre>
+          )}
         </div>
       </div>
     </div>
