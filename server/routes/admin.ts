@@ -335,6 +335,82 @@ router.get("/export-forms", async (req, res) => {
   }
 });
 
+// Admin: list applications
+router.get('/applications', async (req, res) => {
+  try {
+    const rows = await supabaseRequest('applications');
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: update job
+router.put('/jobs/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const payload = req.body;
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.jobs,
+      'PATCH',
+      payload,
+      `?id=eq.${encodeURIComponent(id)}&return=representation`,
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: delete job
+router.delete('/jobs/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.jobs,
+      'DELETE',
+      undefined,
+      `?id=eq.${encodeURIComponent(id)}`,
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: update resource
+router.put('/resources/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const payload = req.body;
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.resources,
+      'PATCH',
+      payload,
+      `?id=eq.${encodeURIComponent(id)}&return=representation`,
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: delete resource
+router.delete('/resources/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await supabaseRequest(
+      ALLOWED_TABLES.resources,
+      'DELETE',
+      undefined,
+      `?id=eq.${encodeURIComponent(id)}`,
+    );
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Multi-sheet XLSX export (each table in its own sheet)
 router.get("/export-xlsx", async (req, res) => {
   try {
