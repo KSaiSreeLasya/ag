@@ -23,7 +23,9 @@
   "dependencies": {
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "multer": "^2.0.2",
+    "exceljs": "^4.3.0"
   },
   "devDependencies": {
     "@hookform/resolvers": "^5.2.1",

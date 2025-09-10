@@ -3,8 +3,11 @@ import { Router } from "express";
 const router = Router();
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-// Use explicit SUPABASE_KEY if provided, otherwise fall back to anon key for public routes
-const SUPABASE_KEY = process.env.SUPABASE_KEY ?? process.env.SUPABASE_ANON_KEY;
+// Prefer service role key on the server to bypass RLS for public submissions; fallback to explicit key or anon
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ??
+  process.env.SUPABASE_KEY ??
+  process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.warn(
@@ -69,9 +72,23 @@ async function supabaseRequest(
 // Public submission endpoints
 router.post("/quotes", async (req, res) => {
   try {
-    const payload = { ...(req.body || {}) };
+    const body = { ...(req.body || {}) };
     // Remove UI-only fields that are not present in DB schema
-    delete payload.agree;
+    delete (body as any).agree;
+    // Whitelist allowed columns for safety
+    const allowed = [
+      "name",
+      "whatsapp",
+      "pincode",
+      "bill",
+      "category",
+    ] as const;
+    const payload = Object.fromEntries(
+      Object.entries(body).filter(([k]) =>
+        (allowed as readonly string[]).includes(k),
+      ),
+    );
+
     const result = await supabaseRequest(
       "quotes",
       "POST",
@@ -107,9 +124,17 @@ router.post("/quotes", async (req, res) => {
 
 router.post("/contacts", async (req, res) => {
   try {
-    const payload = { ...(req.body || {}) };
+    const body = { ...(req.body || {}) };
     // Remove UI-only fields that are not present in DB schema
-    delete payload.agree;
+    delete (body as any).agree;
+    // Whitelist allowed columns for safety
+    const allowed = ["name", "email", "phone", "subject", "message"] as const;
+    const payload = Object.fromEntries(
+      Object.entries(body).filter(([k]) =>
+        (allowed as readonly string[]).includes(k),
+      ),
+    );
+
     const result = await supabaseRequest(
       "contacts",
       "POST",

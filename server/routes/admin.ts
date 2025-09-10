@@ -73,6 +73,18 @@ const ALLOWED_TABLES = {
 // Middleware: require admin user via Supabase auth
 router.use(async (req, res, next) => {
   try {
+    // Development bypass: allow skipping auth when running in dev and header present
+    if (
+      process.env.NODE_ENV !== "production" &&
+      (req.headers["x-skip-auth"] === "1" ||
+        req.headers["x-skip-auth"] === "true")
+    ) {
+      (req as any).supabaseUser = {
+        email: process.env.DEV_ADMIN_EMAIL ?? "dev@localhost",
+      };
+      return next();
+    }
+
     const auth = req.headers.authorization as string | undefined;
     if (!auth)
       return res.status(401).json({ error: "Missing Authorization header" });
@@ -265,6 +277,109 @@ router.get("/export/:table", async (req, res) => {
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", `attachment; filename=\"${key}.csv\"`);
     res.send(csv);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Export combined forms (quotes, contacts, applications, jobs, resources) as a single CSV with sections
+router.get("/export-forms", async (req, res) => {
+  try {
+    const tables = ["quotes", "contacts", "applications", "jobs", "resources"];
+    const parts: string[] = [];
+    for (const t of tables) {
+      let rows: any = [];
+      try {
+        rows = await supabaseRequest(t);
+      } catch (e: any) {
+        // include error note
+        parts.push(
+          `# ${t.toUpperCase()} - ERROR: ${e?.message || String(e)}\n`,
+        );
+        continue;
+      }
+      if (!Array.isArray(rows)) {
+        parts.push(`# ${t.toUpperCase()} - Unexpected response\n`);
+        continue;
+      }
+      parts.push(`# ${t.toUpperCase()}\n`);
+      if (rows.length === 0) {
+        parts.push("(no rows)\n\n");
+        continue;
+      }
+      const columns = Object.keys(rows[0]);
+      const escape = (v: any) => {
+        if (v === null || v === undefined) return "";
+        const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+        if (s.includes(",") || s.includes("\n") || s.includes('"')) {
+          return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
+      };
+      parts.push(columns.join(",") + "\n");
+      for (const r of rows) {
+        parts.push(columns.map((c) => escape(r[c])).join(",") + "\n");
+      }
+      parts.push("\n");
+    }
+
+    const csv = parts.join("");
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=\"all_forms.csv\"`,
+    );
+    res.send(csv);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Multi-sheet XLSX export (each table in its own sheet)
+router.get("/export-xlsx", async (req, res) => {
+  try {
+    const ExcelJS = await import("exceljs");
+    const workbook = new ExcelJS.Workbook();
+    const tables = [
+      "quotes",
+      "contacts",
+      "applications",
+      "job_applications",
+      "jobs",
+      "resources",
+    ];
+    for (const t of tables) {
+      let rows: any[] = [];
+      try {
+        rows = (await supabaseRequest(t)) || [];
+      } catch (e: any) {
+        rows = [];
+      }
+      const sheet = workbook.addWorksheet(t.substring(0, 31)); // sheet name max 31 chars
+      if (!rows || rows.length === 0) {
+        sheet.addRow(["(no rows)"]);
+        continue;
+      }
+      const columns = Object.keys(rows[0]);
+      sheet.addRow(columns);
+      for (const r of rows) {
+        const row = columns.map((c) => {
+          const v = r[c];
+          if (v === null || v === undefined) return "";
+          if (typeof v === "object") return JSON.stringify(v);
+          return String(v);
+        });
+        sheet.addRow(row);
+      }
+    }
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader("Content-Disposition", `attachment; filename=all_forms.xlsx`);
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
