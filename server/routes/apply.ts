@@ -21,7 +21,8 @@ const upload = multer();
 export const handleApply: RequestHandler = (req, res) => {
   // Use multer to parse multipart/form-data (supports resume file)
   upload.single("resume")(req as any, res as any, async (err: any) => {
-    if (err) return res.status(400).json({ error: err.message || "Upload error" });
+    if (err)
+      return res.status(400).json({ error: err.message || "Upload error" });
     try {
       const rawBody = req.body || {};
       // When multipart, fields are strings; map keys accordingly
@@ -47,7 +48,9 @@ export const handleApply: RequestHandler = (req, res) => {
           errors: parse.error.format(),
           flattened: parse.error.flatten(),
         });
-        return res.status(400).json({ error: "Invalid input", details: parse.error.flatten() });
+        return res
+          .status(400)
+          .json({ error: "Invalid input", details: parse.error.flatten() });
       }
 
       // Prepare to upload resume if present
@@ -57,11 +60,14 @@ export const handleApply: RequestHandler = (req, res) => {
 
       const file = (req as any).file as Express.Multer.File | undefined;
       const SUPABASE_URL = process.env.SUPABASE_URL;
-      const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
+      const SUPABASE_KEY =
+        process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_KEY;
 
       if (file) {
         if (!SUPABASE_URL || !SUPABASE_KEY) {
-          return res.status(500).json({ error: "Supabase not configured for file uploads" });
+          return res
+            .status(500)
+            .json({ error: "Supabase not configured for file uploads" });
         }
         // sanitize filename and create path
         const timestamp = Date.now();
@@ -79,7 +85,9 @@ export const handleApply: RequestHandler = (req, res) => {
         });
         if (!resp.ok) {
           const text = await resp.text().catch(() => "");
-          return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}` });
+          return res
+            .status(500)
+            .json({ error: `Upload failed: ${resp.status} ${text}` });
         }
         resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
         resume_filename = file.originalname;
@@ -90,7 +98,13 @@ export const handleApply: RequestHandler = (req, res) => {
       if (!SUPABASE_URL || !SUPABASE_KEY) {
         // fallback: return success but do not persist
         const id = Math.random().toString(36).slice(2);
-        return res.status(200).json({ id, receivedAt: new Date().toISOString(), application: parse.data });
+        return res
+          .status(200)
+          .json({
+            id,
+            receivedAt: new Date().toISOString(),
+            application: parse.data,
+          });
       }
 
       const insertPayload: any = { ...parse.data };
@@ -113,7 +127,9 @@ export const handleApply: RequestHandler = (req, res) => {
       });
       if (!insertResp.ok) {
         const text = await insertResp.text().catch(() => "");
-        return res.status(500).json({ error: `Insert failed: ${insertResp.status} ${text}` });
+        return res
+          .status(500)
+          .json({ error: `Insert failed: ${insertResp.status} ${text}` });
       }
       const body = await insertResp.json().catch(() => null);
       return res.status(201).json({ ok: true, rows: body });
