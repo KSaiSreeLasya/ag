@@ -83,7 +83,7 @@ export default function Admin() {
         </p>
         <div className="space-y-4">
           <div className="flex gap-2">
-            <Button onClick={handleExport}>Export all forms (CSV)</Button>
+            <Button onClick={handleExport}>Export all forms (XLSX)</Button>
             <Button onClick={handleSync} disabled={syncing} variant="outline">
               {syncing ? "Syncing..." : "Sync local to Supabase"}
             </Button>
