@@ -338,8 +338,10 @@ router.get("/export-forms", async (req, res) => {
 // Multi-sheet XLSX export (each table in its own sheet)
 router.get("/export-xlsx", async (req, res) => {
   try {
-    const ExcelJS = await import("exceljs");
-    const workbook = new ExcelJS.Workbook();
+    const excelModule = await import("exceljs");
+    // Support both CJS and ESM exports of exceljs
+    const WorkbookClass = excelModule.Workbook ?? excelModule.default?.Workbook ?? excelModule.default ?? excelModule;
+    const workbook = new WorkbookClass();
     const tables = [
       "quotes",
       "contacts",
