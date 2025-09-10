@@ -31,6 +31,10 @@ import B2C from "./pages/B2C";
 import B2G from "./pages/B2G";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Admin from "./pages/Admin";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
+import Compliance from "./pages/Compliance";
 
 const queryClient = new QueryClient();
 
