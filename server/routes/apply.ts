@@ -146,7 +146,16 @@ export const handleApply: RequestHandler = (req, res) => {
           });
       }
 
-      const insertPayload: any = { ...parse.data };
+      // Map camelCase frontend keys to snake_case DB columns
+      const mapKey = (k: string) =>
+        k
+          .replace(/([A-Z])/g, "_$1")
+          .toLowerCase();
+      const insertPayload: any = {};
+      for (const [k, v] of Object.entries(parse.data)) {
+        const mapped = mapKey(k);
+        insertPayload[mapped] = v;
+      }
       if (resume_url) {
         insertPayload.resume_url = resume_url;
         insertPayload.resume_filename = resume_filename;
@@ -154,7 +163,7 @@ export const handleApply: RequestHandler = (req, res) => {
       }
 
       const insertUrl = `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/applications`;
-      const insertResp = await fetch(insertUrl + "?return=representation", {
+      const insertResp = await fetch(insertUrl, {
         method: "POST",
         headers: {
           apikey: SUPABASE_KEY,
