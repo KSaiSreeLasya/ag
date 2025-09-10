@@ -66,19 +66,31 @@ export default function ApplyForm({ open, onOpenChange, defaultPosition }: Apply
     form.setValue("position", defaultPosition);
   }
 
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+
   const onSubmit = async (values: ApplicationInput) => {
     setSubmitting(true);
     try {
+      // Build FormData to support optional resume file upload
+      const fd = new FormData();
+      Object.entries(values).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) fd.append(k, String(v));
+      });
+      if (resumeFile) {
+        fd.append("resume", resumeFile, resumeFile.name);
+      }
+
       const res = await fetch("/api/apply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: fd,
       });
       if (!res.ok) {
-        throw new Error(`Request failed: ${res.status}`);
+        let text = await res.text().catch(() => "");
+        throw new Error(`Request failed: ${res.status} ${text}`);
       }
-      toast({ title: "Application submitted", description: "We\'ll be in touch soon." });
+      toast({ title: "Application submitted", description: "We'll be in touch soon." });
       onOpenChange(false);
+      setResumeFile(null);
       form.reset({
         position: defaultPosition ?? "",
         fullName: "",
