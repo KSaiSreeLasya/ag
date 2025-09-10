@@ -193,8 +193,13 @@ export const handleApply: RequestHandler = (req, res) => {
       }
       // If resume uploaded, store its public URL in portfolio field (fallback) to avoid missing columns
       if (resume_url) {
+        // prefer explicit resume fields
+        insertPayload.resume_url = resume_url;
+        if (resume_filename) insertPayload.resume_filename = resume_filename;
+        if (resume_content_type) insertPayload.resume_content_type = resume_content_type;
+        // also set portfolio as fallback if provided empty
         if (!insertPayload.portfolio || String(insertPayload.portfolio).trim() === "") {
-          insertPayload.portfolio = resume_url;
+          // keep portfolio empty if not provided
         } else {
           insertPayload.portfolio = `${insertPayload.portfolio} | resume:${resume_url}`;
         }
