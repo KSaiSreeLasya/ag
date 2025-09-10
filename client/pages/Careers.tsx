@@ -56,13 +56,13 @@ export default function Careers() {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch('/api/jobs');
-        if (!res.ok) throw new Error('Failed to load jobs');
+        const res = await fetch("/api/jobs");
+        if (!res.ok) throw new Error("Failed to load jobs");
         const data = await res.json();
         if (mounted) setJobs(Array.isArray(data) ? data : []);
       } catch (e) {
         // fallback keep jobs empty
-        console.warn('Failed to fetch jobs', e);
+        console.warn("Failed to fetch jobs", e);
       }
     })();
     return () => {
@@ -456,7 +456,14 @@ export default function Careers() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <Button className="group-hover:bg-primary/90" onClick={(e) => { e.stopPropagation(); setSelectedPosition(job.title); setApplyOpen(true); }}>
+                        <Button
+                          className="group-hover:bg-primary/90"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPosition(job.title);
+                            setApplyOpen(true);
+                          }}
+                        >
                           Apply Now
                         </Button>
                         <motion.div
@@ -521,7 +528,14 @@ export default function Careers() {
                           </div>
 
                           <div className="mt-6">
-                            <Button className="w-full" size="lg" onClick={() => { setSelectedPosition(job.title); setApplyOpen(true); }}>
+                            <Button
+                              className="w-full"
+                              size="lg"
+                              onClick={() => {
+                                setSelectedPosition(job.title);
+                                setApplyOpen(true);
+                              }}
+                            >
                               Apply for this Position
                               <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
@@ -670,7 +684,11 @@ export default function Careers() {
 
       <Footer />
       <FloatingActionButton />
-      <ApplyForm open={applyOpen} onOpenChange={setApplyOpen} defaultPosition={selectedPosition} />
+      <ApplyForm
+        open={applyOpen}
+        onOpenChange={setApplyOpen}
+        defaultPosition={selectedPosition}
+      />
     </div>
   );
 }

@@ -169,37 +169,42 @@ router.post("/contacts", async (req, res) => {
 });
 
 // Public listing endpoints for jobs and resources
-router.get('/jobs', async (req, res) => {
+router.get("/jobs", async (req, res) => {
   try {
-    const rows = await supabaseRequest('jobs');
+    const rows = await supabaseRequest("jobs");
     return res.json(rows);
   } catch (err: any) {
-    console.error('Public /jobs error:', err);
+    console.error("Public /jobs error:", err);
     // Fallback: return local persisted jobs if any
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const file = path.resolve(process.cwd(), 'server', 'data', 'jobs.json');
-      const existing = await fs.readFile(file, 'utf-8').catch(() => '[]');
-      return res.json(JSON.parse(existing || '[]'));
+      const fs = await import("fs/promises");
+      const path = await import("path");
+      const file = path.resolve(process.cwd(), "server", "data", "jobs.json");
+      const existing = await fs.readFile(file, "utf-8").catch(() => "[]");
+      return res.json(JSON.parse(existing || "[]"));
     } catch (e) {
       return res.status(500).json({ error: err?.message || String(err) });
     }
   }
 });
 
-router.get('/resources', async (req, res) => {
+router.get("/resources", async (req, res) => {
   try {
-    const rows = await supabaseRequest('resources');
+    const rows = await supabaseRequest("resources");
     return res.json(rows);
   } catch (err: any) {
-    console.error('Public /resources error:', err);
+    console.error("Public /resources error:", err);
     try {
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const file = path.resolve(process.cwd(), 'server', 'data', 'resources.json');
-      const existing = await fs.readFile(file, 'utf-8').catch(() => '[]');
-      return res.json(JSON.parse(existing || '[]'));
+      const fs = await import("fs/promises");
+      const path = await import("path");
+      const file = path.resolve(
+        process.cwd(),
+        "server",
+        "data",
+        "resources.json",
+      );
+      const existing = await fs.readFile(file, "utf-8").catch(() => "[]");
+      return res.json(JSON.parse(existing || "[]"));
     } catch (e) {
       return res.status(500).json({ error: err?.message || String(err) });
     }

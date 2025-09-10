@@ -336,9 +336,9 @@ router.get("/export-forms", async (req, res) => {
 });
 
 // Admin: list applications
-router.get('/applications', async (req, res) => {
+router.get("/applications", async (req, res) => {
   try {
-    const rows = await supabaseRequest('applications');
+    const rows = await supabaseRequest("applications");
     res.json(rows);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -346,13 +346,13 @@ router.get('/applications', async (req, res) => {
 });
 
 // Admin: update job
-router.put('/jobs/:id', async (req, res) => {
+router.put("/jobs/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const payload = req.body;
     const result = await supabaseRequest(
       ALLOWED_TABLES.jobs,
-      'PATCH',
+      "PATCH",
       payload,
       `?id=eq.${encodeURIComponent(id)}&return=representation`,
     );
@@ -363,12 +363,12 @@ router.put('/jobs/:id', async (req, res) => {
 });
 
 // Admin: delete job
-router.delete('/jobs/:id', async (req, res) => {
+router.delete("/jobs/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const result = await supabaseRequest(
       ALLOWED_TABLES.jobs,
-      'DELETE',
+      "DELETE",
       undefined,
       `?id=eq.${encodeURIComponent(id)}`,
     );
@@ -379,13 +379,13 @@ router.delete('/jobs/:id', async (req, res) => {
 });
 
 // Admin: update resource
-router.put('/resources/:id', async (req, res) => {
+router.put("/resources/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const payload = req.body;
     const result = await supabaseRequest(
       ALLOWED_TABLES.resources,
-      'PATCH',
+      "PATCH",
       payload,
       `?id=eq.${encodeURIComponent(id)}&return=representation`,
     );
@@ -396,12 +396,12 @@ router.put('/resources/:id', async (req, res) => {
 });
 
 // Admin: delete resource
-router.delete('/resources/:id', async (req, res) => {
+router.delete("/resources/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const result = await supabaseRequest(
       ALLOWED_TABLES.resources,
-      'DELETE',
+      "DELETE",
       undefined,
       `?id=eq.${encodeURIComponent(id)}`,
     );
@@ -416,7 +416,11 @@ router.get("/export-xlsx", async (req, res) => {
   try {
     const excelModule = await import("exceljs");
     // Support both CJS and ESM exports of exceljs
-    const WorkbookClass = excelModule.Workbook ?? excelModule.default?.Workbook ?? excelModule.default ?? excelModule;
+    const WorkbookClass =
+      excelModule.Workbook ??
+      excelModule.default?.Workbook ??
+      excelModule.default ??
+      excelModule;
     const workbook = new WorkbookClass();
     const tables = [
       "quotes",
