@@ -530,15 +530,29 @@ export default function Careers() {
                             Benefits
                           </h4>
                           <div className="space-y-2">
-                            {job.benefits.map((benefit, benefitIndex) => (
-                              <Badge
-                                key={benefitIndex}
-                                variant="secondary"
-                                className="mr-2 mb-2"
-                              >
-                                {benefit}
-                              </Badge>
-                            ))}
+                            {(() => {
+                              const bens = Array.isArray(job.benefits)
+                                ? job.benefits
+                                : typeof job.benefits === 'string'
+                                ? (() => {
+                                    try {
+                                      const parsed = JSON.parse(job.benefits);
+                                      return Array.isArray(parsed) ? parsed : [];
+                                    } catch (e) {
+                                      return [];
+                                    }
+                                  })()
+                                : [];
+                              return bens.map((benefit: any, benefitIndex: number) => (
+                                <Badge
+                                  key={benefitIndex}
+                                  variant="secondary"
+                                  className="mr-2 mb-2"
+                                >
+                                  {benefit}
+                                </Badge>
+                              ));
+                            })()}
                           </div>
 
                           <div className="mt-6">
