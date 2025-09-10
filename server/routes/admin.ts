@@ -74,8 +74,14 @@ const ALLOWED_TABLES = {
 router.use(async (req, res, next) => {
   try {
     // Development bypass: allow skipping auth when running in dev and header present
-    if (process.env.NODE_ENV !== "production" && (req.headers["x-skip-auth"] === "1" || req.headers["x-skip-auth"] === "true")) {
-      (req as any).supabaseUser = { email: process.env.DEV_ADMIN_EMAIL ?? "dev@localhost" };
+    if (
+      process.env.NODE_ENV !== "production" &&
+      (req.headers["x-skip-auth"] === "1" ||
+        req.headers["x-skip-auth"] === "true")
+    ) {
+      (req as any).supabaseUser = {
+        email: process.env.DEV_ADMIN_EMAIL ?? "dev@localhost",
+      };
       return next();
     }
 
@@ -287,7 +293,9 @@ router.get("/export-forms", async (req, res) => {
         rows = await supabaseRequest(t);
       } catch (e: any) {
         // include error note
-        parts.push(`# ${t.toUpperCase()} - ERROR: ${e?.message || String(e)}\n`);
+        parts.push(
+          `# ${t.toUpperCase()} - ERROR: ${e?.message || String(e)}\n`,
+        );
         continue;
       }
       if (!Array.isArray(rows)) {
@@ -317,7 +325,10 @@ router.get("/export-forms", async (req, res) => {
 
     const csv = parts.join("");
     res.setHeader("Content-Type", "text/csv");
-    res.setHeader("Content-Disposition", `attachment; filename=\"all_forms.csv\"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=\"all_forms.csv\"`,
+    );
     res.send(csv);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

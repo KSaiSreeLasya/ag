@@ -85,7 +85,12 @@ export const handleApply: RequestHandler = (req, res) => {
         });
         if (!resp.ok) {
           const text = await resp.text().catch(() => "");
-          console.error("Resume upload failed", { status: resp.status, body: text, path, bucket: 'resumes' });
+          console.error("Resume upload failed", {
+            status: resp.status,
+            body: text,
+            path,
+            bucket: "resumes",
+          });
           // Try to create the bucket if missing (best-effort)
           try {
             const bucketUrl = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/bucket`;
@@ -115,17 +120,33 @@ export const handleApply: RequestHandler = (req, res) => {
                 resume_content_type = file.mimetype;
               } else {
                 const t2 = await retryResp.text().catch(() => "");
-                console.error("Retry upload failed", { status: retryResp.status, body: t2 });
-                return res.status(500).json({ error: `Upload failed after bucket creation: ${retryResp.status} ${t2}` });
+                console.error("Retry upload failed", {
+                  status: retryResp.status,
+                  body: t2,
+                });
+                return res
+                  .status(500)
+                  .json({
+                    error: `Upload failed after bucket creation: ${retryResp.status} ${t2}`,
+                  });
               }
             } else {
               const ct = await createResp.text().catch(() => "");
-              console.error("Failed to create bucket", { status: createResp.status, body: ct });
-              return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}` });
+              console.error("Failed to create bucket", {
+                status: createResp.status,
+                body: ct,
+              });
+              return res
+                .status(500)
+                .json({
+                  error: `Upload failed: ${resp.status} ${text}; bucket create failed: ${createResp.status} ${ct}`,
+                });
             }
           } catch (e2: any) {
             console.error("Bucket creation attempt failed", e2);
-            return res.status(500).json({ error: `Upload failed: ${resp.status} ${text}` });
+            return res
+              .status(500)
+              .json({ error: `Upload failed: ${resp.status} ${text}` });
           }
         }
         resume_url = `${SUPABASE_URL.replace(/\/$/, "")}/storage/v1/object/public/${encodeURIComponent("resumes")}/${encodeURIComponent(path)}`;
@@ -137,20 +158,15 @@ export const handleApply: RequestHandler = (req, res) => {
       if (!SUPABASE_URL || !SUPABASE_KEY) {
         // fallback: return success but do not persist
         const id = Math.random().toString(36).slice(2);
-        return res
-          .status(200)
-          .json({
-            id,
-            receivedAt: new Date().toISOString(),
-            application: parse.data,
-          });
+        return res.status(200).json({
+          id,
+          receivedAt: new Date().toISOString(),
+          application: parse.data,
+        });
       }
 
       // Map camelCase frontend keys to snake_case DB columns
-      const mapKey = (k: string) =>
-        k
-          .replace(/([A-Z])/g, "_$1")
-          .toLowerCase();
+      const mapKey = (k: string) => k.replace(/([A-Z])/g, "_$1").toLowerCase();
       const insertPayload: any = {};
       for (const [k, v] of Object.entries(parse.data)) {
         const mapped = mapKey(k);
@@ -168,8 +184,12 @@ export const handleApply: RequestHandler = (req, res) => {
         Authorization: `Bearer ${SUPABASE_KEY}`,
         Prefer: "return=representation",
         "Content-Type": "application/json",
-      } as Record<string,string>;
-      console.log("Supabase insert", { url: insertUrl, headers: headersObj, payloadSample: JSON.stringify(insertPayload).slice(0,200) });
+      } as Record<string, string>;
+      console.log("Supabase insert", {
+        url: insertUrl,
+        headers: headersObj,
+        payloadSample: JSON.stringify(insertPayload).slice(0, 200),
+      });
       const insertResp = await fetch(insertUrl, {
         method: "POST",
         headers: headersObj,
@@ -177,7 +197,11 @@ export const handleApply: RequestHandler = (req, res) => {
       });
       if (!insertResp.ok) {
         const text = await insertResp.text().catch(() => "");
-        console.error("Insert into applications failed", { status: insertResp.status, body: text, payload: insertPayload });
+        console.error("Insert into applications failed", {
+          status: insertResp.status,
+          body: text,
+          payload: insertPayload,
+        });
         return res
           .status(500)
           .json({ error: `Insert failed: ${insertResp.status} ${text}` });

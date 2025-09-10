@@ -7,7 +7,9 @@ export default function Admin() {
 
   const handleExport = async () => {
     try {
-      const res = await fetch("/api/admin/export-forms", { headers: { "x-skip-auth": "1" } });
+      const res = await fetch("/api/admin/export-forms", {
+        headers: { "x-skip-auth": "1" },
+      });
       if (!res.ok) throw new Error("Export failed");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -29,7 +31,10 @@ export default function Admin() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await fetch("/api/admin/sync-local", { method: "POST", headers: { "x-skip-auth": "1" } });
+      const res = await fetch("/api/admin/sync-local", {
+        method: "POST",
+        headers: { "x-skip-auth": "1" },
+      });
       // Safely attempt to read body; handle cases where body was already consumed.
       let text = "";
       try {
@@ -91,7 +96,9 @@ export default function Admin() {
               endpoints to populate this area.
             </p>
             {syncResult && (
-              <pre className="mt-4 text-xs bg-gray-900 text-white p-2 rounded">{syncResult}</pre>
+              <pre className="mt-4 text-xs bg-gray-900 text-white p-2 rounded">
+                {syncResult}
+              </pre>
             )}
           </div>
         </div>
